@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/register.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +13,9 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+    var PhoneCTL = TextEditingController();
+  var passwdCTL = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +28,7 @@ class _LoginState extends State<Login> {
             Padding(
               padding: const EdgeInsets.only(top: 100,bottom: 30),
               child: 
-              Image.asset('asset/image/login.png'),
+              Image.asset('assets/image/login.png'),
             ),
              SizedBox(
               width: 365,
@@ -66,9 +72,7 @@ class _LoginState extends State<Login> {
                         const SizedBox(height: 25.0),
 
             ElevatedButton(
-              onPressed: () {
-                // Handle sign in action
-              },
+              onPressed: login,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.lightBlue, // Background color
                 shape: RoundedRectangleBorder(
@@ -104,4 +108,23 @@ class _LoginState extends State<Login> {
       ),
     );
   }
+
+ void login() async {
+  try {
+    // int phoneNumber = int.parse();
+    var db = FirebaseFirestore.instance;
+    var inboxRef = db.collection("user");
+    var query = inboxRef.where("phone", isEqualTo:"PhoneCTL.text");
+    var result = await query.get();
+    if (result.docs.isNotEmpty) {
+      var userData = result.docs.first.data();
+      log('User found: ${userData['name']}');
+    } else {
+      log('No user found with this phone number.');
+    }
+  } catch (e) {
+    log('Error: $e');
+  }
+}
+
 }
