@@ -1,4 +1,6 @@
+import 'package:fast_feast/page/home.dart';
 import 'package:fast_feast/page/login.dart';
+import 'package:fast_feast/page/sender.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,7 +22,17 @@ class _linkState extends State<link> {
               onPressed: () {
                 Get.to(const Login());
               },
-              child: const Text("login"))
+              child: const Text("login")),
+          FilledButton(
+              onPressed: () {
+                Get.to(const HomePage());
+              },
+              child: const Text("home")),
+          FilledButton(
+              onPressed: () {
+                Get.to(const SenderPage());
+              },
+              child: const Text("Sender")),
         ],
       ),
     );
