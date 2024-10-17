@@ -1,3 +1,8 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fast_feast/page/home.dart';
+import 'package:fast_feast/page/homeRider.dart';
 import 'package:fast_feast/page/register.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +15,9 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  var PhoneCTL = TextEditingController();
+  var passwdCTL = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,11 +30,12 @@ class _LoginState extends State<Login> {
             Padding(
               padding: const EdgeInsets.only(top: 100,bottom: 30),
               child: 
-              Image.asset('asset/image/login.png'),
+              Image.asset('assets/image/login.png'),
             ),
              SizedBox(
               width: 365,
                child: TextFormField(
+                controller: PhoneCTL,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.phone, color: Colors.grey),
                   labelText: 'Phone Number',
@@ -47,6 +56,7 @@ class _LoginState extends State<Login> {
             SizedBox(
               width: 365,
               child: TextFormField(
+                controller: passwdCTL,
                 obscureText: true,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.lock, color: Colors.grey),
@@ -66,9 +76,7 @@ class _LoginState extends State<Login> {
                         const SizedBox(height: 25.0),
 
             ElevatedButton(
-              onPressed: () {
-                // Handle sign in action
-              },
+              onPressed: login,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.lightBlue, // Background color
                 shape: RoundedRectangleBorder(
@@ -104,4 +112,26 @@ class _LoginState extends State<Login> {
       ),
     );
   }
+
+ void login() async {
+  CollectionReference users = FirebaseFirestore.instance.collection('user');
+
+  // Query the collection with conditions on phone and password
+  QuerySnapshot querySnapshot = await users.where('phone', isEqualTo: PhoneCTL.text).where('password', isEqualTo: passwdCTL.text).get();
+  log(PhoneCTL.text);
+  log(passwdCTL.text);
+  // Check if any documents match the query
+  if (querySnapshot.docs.isNotEmpty) {
+      log("User name: ${ querySnapshot.docs[0]['name']}");
+      if(querySnapshot.docs[0]['type'] == 1){
+        Get.to(const HomePage());
+      }
+      else if(querySnapshot.docs[0]['type'] == 2){
+        Get.to(const Homerider());
+      }
+  } else {
+    log('No matching user found.');
+  }
+}
+
 }

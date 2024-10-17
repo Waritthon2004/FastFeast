@@ -9,7 +9,7 @@ class MyDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
         child: Padding(
-      padding: const EdgeInsets.only(top: 50, left: 10),
+      padding: const EdgeInsets.only(top: 30, left: 10),
       child: Column(
         children: [
           Padding(

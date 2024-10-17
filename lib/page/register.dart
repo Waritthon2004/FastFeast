@@ -14,6 +14,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   List<bool> isSelected = [true, false]; // For User and Rider toggle buttons
   Widget widgetField = const RegisUser();
+
   @override
   bool isUserSelected = true; // By default, 'User' is selected
   Widget build(BuildContext context) {
