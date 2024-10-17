@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
@@ -41,7 +40,20 @@ class _StatusPageState extends State<StatusPage> {
           children: [
             header(context),
             const SizedBox(
-              height: 100,
+              height: 20,
+            ),
+            const CustomStatusBar(
+              icons: [
+                Icons.hourglass_empty,
+                Icons.phone_android,
+                Icons.motorcycle,
+                Icons.check_circle,
+              ],
+              currentStep:
+                  1, 
+            ),
+            const SizedBox(
+              height: 20,
             ),
             SizedBox(
               width: 300,
@@ -264,4 +276,56 @@ Future<Position> _determinePosition() async {
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.
   return await Geolocator.getCurrentPosition();
+}
+
+class CustomStatusBar extends StatelessWidget {
+  final List<IconData> icons;
+  final int currentStep;
+
+  const CustomStatusBar({
+    Key? key,
+    required this.icons,
+    required this.currentStep,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(icons.length * 2 - 1, (index) {
+        if (index.isEven) {
+          final stepIndex = index ~/ 2;
+          final isCompleted = stepIndex < currentStep;
+          final isActive = stepIndex == currentStep;
+          return _buildStep(icons[stepIndex], isCompleted, isActive);
+        } else {
+          return _buildLine(index ~/ 2 < currentStep);
+        }
+      }),
+    );
+  }
+
+  Widget _buildStep(IconData icon, bool isCompleted, bool isActive) {
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isCompleted || isActive ? Color.fromARGB(255, 13, 228, 56) : Colors.grey[300],
+      ),
+      child: Icon(
+        icon,
+        color: Colors.white,
+        size: 30,
+      ),
+    );
+  }
+
+  Widget _buildLine(bool isCompleted) {
+    return Container(
+      width: 40,
+      height: 2,
+      color: isCompleted ? Color.fromARGB(255, 0, 211, 14) : Colors.grey[300],
+    );
+  }
 }
