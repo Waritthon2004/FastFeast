@@ -72,22 +72,22 @@ class _RegisUserState extends State<RegisUser> {
           ),
         ),
         SizedBox(height: 16.0),
-        TextFormField(
-          controller: LocationCTL,
-          decoration: InputDecoration(
-            prefixIcon: Icon(Icons.location_on_outlined),
-            labelText: 'Your Location',
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18.0),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-          ),
-        ),
-        SizedBox(height: 16.0),
+        // TextFormField(
+        //   controller: LocationCTL,
+        //   decoration: InputDecoration(
+        //     prefixIcon: Icon(Icons.location_on_outlined),
+        //     labelText: 'Your Location',
+        //     enabledBorder: OutlineInputBorder(
+        //       borderRadius: BorderRadius.circular(18),
+        //       borderSide: BorderSide(color: Colors.grey.shade300),
+        //     ),
+        //     focusedBorder: OutlineInputBorder(
+        //       borderRadius: BorderRadius.circular(18.0),
+        //       borderSide: BorderSide(color: Colors.grey.shade300),
+        //     ),
+        //   ),
+        // ),
+        // SizedBox(height: 16.0),
         TextFormField(
           controller: passwdCTL,
           obscureText: true,
@@ -121,7 +121,16 @@ class _RegisUserState extends State<RegisUser> {
             ),
           ),
         ),
-        SizedBox(height: 32.0),
+        SizedBox(height: 10.0),
+         ElevatedButton(
+      onPressed: (){},
+      child: const Text('Select your location'),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        textStyle: const TextStyle(fontSize: 16),
+      )),
+              SizedBox(height: 10.0),
+
         // Create Account Button
         ElevatedButton(
           onPressed: register,
@@ -137,8 +146,10 @@ class _RegisUserState extends State<RegisUser> {
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
+        
       ],
     );
+    
   }
 
 
