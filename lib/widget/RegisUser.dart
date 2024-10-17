@@ -159,7 +159,6 @@ void register() async {
       passwdCTL.text.isEmpty ||
       PhoneCTL.text.isEmpty ||
       AddressCTL.text.isEmpty ||
-      LocationCTL.text.isEmpty ||
       passwdConfirmCTL.text.isEmpty) {
     log("กรอกไม่ครบครับ");
     return;
