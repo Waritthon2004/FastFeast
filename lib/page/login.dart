@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fast_feast/page/home.dart';
+import 'package:fast_feast/page/homeRider.dart';
 import 'package:fast_feast/page/register.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,7 +15,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-    var PhoneCTL = TextEditingController();
+  var PhoneCTL = TextEditingController();
   var passwdCTL = TextEditingController();
 
   @override
@@ -33,6 +35,7 @@ class _LoginState extends State<Login> {
              SizedBox(
               width: 365,
                child: TextFormField(
+                controller: PhoneCTL,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.phone, color: Colors.grey),
                   labelText: 'Phone Number',
@@ -53,6 +56,7 @@ class _LoginState extends State<Login> {
             SizedBox(
               width: 365,
               child: TextFormField(
+                controller: passwdCTL,
                 obscureText: true,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.lock, color: Colors.grey),
@@ -110,20 +114,23 @@ class _LoginState extends State<Login> {
   }
 
  void login() async {
-  try {
-    // int phoneNumber = int.parse();
-    var db = FirebaseFirestore.instance;
-    var inboxRef = db.collection("user");
-    var query = inboxRef.where("phone", isEqualTo:"PhoneCTL.text");
-    var result = await query.get();
-    if (result.docs.isNotEmpty) {
-      var userData = result.docs.first.data();
-      log('User found: ${userData['name']}');
-    } else {
-      log('No user found with this phone number.');
-    }
-  } catch (e) {
-    log('Error: $e');
+  CollectionReference users = FirebaseFirestore.instance.collection('user');
+
+  // Query the collection with conditions on phone and password
+  QuerySnapshot querySnapshot = await users.where('phone', isEqualTo: PhoneCTL.text).where('password', isEqualTo: passwdCTL.text).get();
+  log(PhoneCTL.text);
+  log(passwdCTL.text);
+  // Check if any documents match the query
+  if (querySnapshot.docs.isNotEmpty) {
+      log("User name: ${ querySnapshot.docs[0]['name']}");
+      if(querySnapshot.docs[0]['type'] == 1){
+        Get.to(const HomePage());
+      }
+      else if(querySnapshot.docs[0]['type'] == 2){
+        Get.to(const Homerider());
+      }
+  } else {
+    log('No matching user found.');
   }
 }
 
