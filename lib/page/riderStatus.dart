@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/bar.dart';
+import 'package:fast_feast/page/barRider.dart';
 import 'package:fast_feast/page/drawer.dart';
 import 'package:fast_feast/page/login.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -16,6 +17,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
+
 class Riderstatus extends StatefulWidget {
   const Riderstatus({super.key});
 
@@ -27,9 +29,9 @@ class _RiderstatusState extends State<Riderstatus> {
   final MapController mapController = MapController();
   TextEditingController receiver = TextEditingController();
   TextEditingController des = TextEditingController();
-  int status=0;
+  int status = 0;
   var data;
-   XFile? image;
+  XFile? image;
   @override
   LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
   @override
@@ -88,103 +90,118 @@ class _RiderstatusState extends State<Riderstatus> {
                 child: Container(
                   width: 340,
                   height: 155,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: const Offset(0, 3), // changes position of shadow
-                          ),
-                        ],
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset:
+                            const Offset(0, 3), // changes position of shadow
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.local_shipping, color: Colors.orange),
-                        SizedBox(width: 8),
-                        Text(
-                          "ตลาดน้อย",
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Container(
-                        width:
-                            1, // This controls the thickness of the vertical line
-                        height: 50, // This controls the height of the line
-                        color: Colors.grey, // Line color
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    const Row(
-                      children: [
-                        Icon(Icons.location_on, color: Colors.blue),
-                        SizedBox(width: 8),
-                        Text("ตึก IT", style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: camera,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 56, 104, 248),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    minimumSize: const Size(80, 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(16), // Border radius of 10
-                    ),
-                  ),
-                  child: const Text(
-                    'อัพเดตสถานะ',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, color: Colors.white,fontSize: 18),
-                  ),
-                ),
+                            const Row(
+                              children: [
+                                Icon(Icons.local_shipping,
+                                    color: Colors.orange),
+                                SizedBox(width: 8),
+                                Text(
+                                  "ตลาดน้อย",
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Container(
+                                width:
+                                    1, // This controls the thickness of the vertical line
+                                height:
+                                    50, // This controls the height of the line
+                                color: Colors.grey, // Line color
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            const Row(
+                              children: [
+                                Icon(Icons.location_on, color: Colors.blue),
+                                SizedBox(width: 8),
+                                Text("ตึก IT",
+                                    style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold)),
+                              ],
+                            ),
                           ],
+                        ),
+                        ElevatedButton(
+                          onPressed: camera,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 56, 104, 248),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            minimumSize: const Size(80, 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  16), // Border radius of 10
+                            ),
+                          ),
+                          child: const Text(
+                            'อัพเดตสถานะ',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 18),
                           ),
                         ),
+                      ],
                     ),
+                  ),
+                ),
               ),
             )
           ],
         ),
-
       ),
       drawer: const MyDrawer(),
-      bottomNavigationBar: const Bar(),
+      bottomNavigationBar: const BarRider(),
     );
   }
 
- void camera() async {
-  final ImagePicker picker = ImagePicker();
-  image = await picker.pickImage(source: ImageSource.camera);
-  if (image != null) {
-    log('Image selected: ${image!.path}');
-    save();
-    setState(() {});
-  } else {
-    log('No image selected');
+  void camera() async {
+    final ImagePicker picker = ImagePicker();
+    image = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      log('Image selected: ${image!.path}');
+      save();
+      setState(() {});
+    } else {
+      log('No image selected');
+    }
   }
-}
 
-void save() async {
+  void save() async {
+  var position = await _determinePosition();
+  log("${position.latitude} and ${position.longitude}");
+  latLng = LatLng(position.latitude, position.longitude);
+  mapController.move(latLng, mapController.camera.zoom);
+  setState(() {});
+
   if (image != null) {
     File file = File(image!.path);
     String fileName = basename(file.path);
@@ -207,13 +224,13 @@ void save() async {
         var data = {
           'status': 1,
           'image': downloadURL,
+          'location': {
+            'latitude': position.latitude,
+            'longitude': position.longitude,
+          },
         };
 
-        db.collection('status').add(data).then((DocumentReference doc) {
-          log('Document added with ID: ${doc.id}');
-        }).catchError((error) {
-          log('Firestore error adding document: $error');
-        });
+        db.collection('status').doc("2").set(data);
       } catch (error) {
         log('Error getting download URL: $error');
       }
@@ -225,17 +242,23 @@ void save() async {
     log("No image selected.");
   }
 }
-void updateStatus(){
-  setState(() {
-    status = status+1;
-  });
-}
 
+  void updateStatus() {
+    setState(() {
+      status = status + 1;
+    });
+  }
 }
 
 Widget header(BuildContext context) {
   return Container(
-    color: const Color(0xFF1ABBE0),
+    decoration: const BoxDecoration(
+      color: Color(0xFF1ABBE0),
+      borderRadius: BorderRadius.only(
+        bottomLeft: Radius.circular(20), // Bottom-left corner radius
+        bottomRight: Radius.circular(20), // Bottom-right corner radius
+      ),
+    ),
     width: MediaQuery.of(context).size.width,
     height: 120,
     child: const Padding(
@@ -243,20 +266,23 @@ Widget header(BuildContext context) {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-            Padding(
-              padding: EdgeInsets.only(bottom: 10),
-              child: Text("ข้อมูลการจัดส่ง",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 25,color: Colors.white)),
-            ),
-            CustomStatusBar(
-              icons: [
-                Icons.hourglass_empty,
-                Icons.phone_android,
-                Icons.motorcycle,
-                Icons.check_circle,
-              ],
-              currentStep:
-                  1, 
-            ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 10),
+            child: Text("ข้อมูลการจัดส่ง",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25,
+                    color: Colors.white)),
+          ),
+          CustomStatusBar(
+            icons: [
+              Icons.hourglass_empty,
+              Icons.phone_android,
+              Icons.motorcycle,
+              Icons.check_circle,
+            ],
+            currentStep: 1,
+          ),
         ],
       ),
     ),
@@ -269,7 +295,6 @@ Future<Position> _determinePosition() async {
 
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
-
     return Future.error('Location services are disabled.');
   }
 
@@ -277,7 +302,6 @@ Future<Position> _determinePosition() async {
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
-  
       return Future.error('Location permissions are denied');
     }
   }
@@ -326,7 +350,9 @@ class CustomStatusBar extends StatelessWidget {
       height: 50,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isCompleted || isActive ? Color.fromARGB(255, 13, 228, 56) : Colors.grey[300],
+        color: isCompleted || isActive
+            ? Color.fromARGB(255, 13, 228, 56)
+            : Colors.grey[300],
       ),
       child: Icon(
         icon,

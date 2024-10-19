@@ -1,10 +1,7 @@
-import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/barRider.dart';
 import 'package:fast_feast/page/drawer.dart';
-import 'package:fast_feast/page/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
 class Homerider extends StatefulWidget {
   const Homerider({super.key});
 
