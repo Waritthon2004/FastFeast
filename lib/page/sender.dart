@@ -93,8 +93,11 @@ class _SenderPageState extends State<SenderPage> {
                                         ),
                                         FilledButton(
                                             onPressed: () {
-                                              setState(() {
+                                              setState(() async {
+                                                receiver.text = u.phone;
                                                 phone = u.phone;
+                                                await queryDatafillter();
+                                                users = [];
                                               });
                                             },
                                             child: Text("เลือก"))
@@ -151,14 +154,22 @@ class _SenderPageState extends State<SenderPage> {
           child: SizedBox(
             width: 300,
             child: TextField(
-              onTap: () {
+              onTap: () async {
                 if (controller == receiver) {
-                  queryData();
+                  await queryData();
+                } else {
+                  setState(() {
+                    users = [];
+                  });
                 }
               },
-              onChanged: (value) {
+              onChanged: (value) async {
                 if (controller == receiver) {
-                  queryDatafillter();
+                  await queryDatafillter();
+                } else {
+                  setState(() {
+                    users = [];
+                  });
                 }
               },
               controller: controller,

@@ -180,7 +180,7 @@ class RegisRiderState extends State<RegisRider> {
           height: 16,
         ),
         ElevatedButton(
-          onPressed: register,
+          onPressed: save,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.lightBlue,
             shape: RoundedRectangleBorder(
@@ -256,10 +256,12 @@ class RegisRiderState extends State<RegisRider> {
       log(image!.path);
       setState(() {});
     }
+    Get.back();
   }
 
   void save() async {
-    if (image != null) {
+    try {
+      if (image != null) {
       File file = File(image!.path);
       String fileName = basename(file.path);
       Reference firebaseStorageRef =
@@ -272,5 +274,9 @@ class RegisRiderState extends State<RegisRider> {
     } else {
       log("No image selected.");
     }
+    } catch (e) {
+      log(e.toString());
+    }
+    
   }
 }

@@ -30,7 +30,7 @@ class _RegisUserState extends State<RegisUser> {
   MapController mapController = MapController();
   String url = "";
   XFile? image;
-
+  LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
   FirebaseStorage storage = FirebaseStorage.instance;
 
   @override
@@ -186,8 +186,6 @@ class _RegisUserState extends State<RegisUser> {
         SizedBox(height: 10.0),
         ElevatedButton(
           onPressed: () {
-            LatLng latLng =
-                const LatLng(16.246825669508297, 103.25199289277295);
             List<Marker> markers = [
               Marker(
                 point: latLng,
@@ -213,7 +211,8 @@ class _RegisUserState extends State<RegisUser> {
                             initialZoom: 15.0,
                             onTap: (tapPosition, point) {
                               setState(() {
-                                latLng = point; // อัพเดต latLng
+                                latLng = point;
+                                // อัพเดต latLng
                                 log(latLng.toString());
                                 markers = [
                                   Marker(
@@ -265,8 +264,7 @@ class _RegisUserState extends State<RegisUser> {
               ),
               confirm: ElevatedButton(
                 onPressed: () {
-                  Get.back(
-                      result: latLng); // ส่งคืน latLng แทน markers[0].point
+                  Get.back(result: latLng);
                 },
                 child: const Text('Confirm'),
               ),
@@ -326,97 +324,90 @@ class _RegisUserState extends State<RegisUser> {
   }
 
   void save() async {
-    if (image != null) {
-      File file = File(image!.path);
-      String fileName = basename(file.path);
-      Reference firebaseStorageRef =
-          FirebaseStorage.instance.ref().child('uploads/$fileName');
-      UploadTask uploadTask = firebaseStorageRef.putFile(file);
-      url = await firebaseStorageRef.getDownloadURL();
-      log(url);
-      await uploadTask.whenComplete(() async {});
-      log(passwdConfirmCTL.text);
-      if (nameCTL.text.isEmpty ||
-          passwdCTL.text.isEmpty ||
-          PhoneCTL.text.isEmpty ||
-          AddressCTL.text.isEmpty ||
-          passwdConfirmCTL.text.isEmpty) {
-        log("กรอกไม่ครบครับ");
+    if (nameCTL.text.isEmpty ||
+        passwdCTL.text.isEmpty ||
+        PhoneCTL.text.isEmpty ||
+        AddressCTL.text.isEmpty ||
+        passwdConfirmCTL.text.isEmpty) {
+      Get.snackbar('Error', 'Please fill in all fields',
+          snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
+    if (passwdCTL.text != passwdConfirmCTL.text) {
+      Get.snackbar('Error', 'Passwords do not match',
+          snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
+    try {
+      var db = FirebaseFirestore.instance;
+      var querySnapshot = await db
+          .collection('user')
+          .where('phone', isEqualTo: PhoneCTL.text)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        Get.snackbar('Error', 'This phone number is already registered',
+            snackPosition: SnackPosition.BOTTOM);
         return;
       }
+      String imageUrl = '';
+      if (image != null) {
+        File file = File(image!.path);
+        String fileName =
+            '${DateTime.now().millisecondsSinceEpoch}_${basename(file.path)}';
+        Reference firebaseStorageRef =
+            FirebaseStorage.instance.ref().child('uploads/$fileName');
 
-      try {
-        var db = FirebaseFirestore.instance;
+        UploadTask uploadTask = firebaseStorageRef.putFile(file);
 
-        // Check if a user with the same phone number already exists
-        var querySnapshot = await db
-            .collection('user')
-            .where('phone', isEqualTo: PhoneCTL.text)
-            .get();
-
-        if (querySnapshot.docs.isNotEmpty) {
-          // Phone number already exists
-          log("หมายเลขโทรศัพท์นี้มีอยู่ในระบบแล้ว");
-          return;
-        }
-
-        // If no duplicate, proceed to add the new user
-        var data = {
-          'name': nameCTL.text,
-          'address': AddressCTL.text,
-          'location': LocationCTL.text,
-          'password': passwdCTL.text,
-          'phone': PhoneCTL.text,
-          'url': url,
-        };
-        db.collection('user').doc(PhoneCTL.text).set(data);
-        Get.to(const Login());
-      } catch (e) {
-        log(e.toString());
+        TaskSnapshot taskSnapshot = await uploadTask;
+        imageUrl = await taskSnapshot.ref.getDownloadURL();
+        log('Image uploaded. URL: $imageUrl');
       }
-    } else {
-      log("No image selected.");
+
+      // Prepare user data
+      var data = {
+        'name': nameCTL.text,
+        'address': AddressCTL.text,
+        'location': GeoPoint(latLng.latitude, latLng.longitude),
+        'password': passwdCTL.text,
+        'phone': PhoneCTL.text,
+        'type': 1,
+        'url': imageUrl,
+      };
+      await db.collection('user').doc(PhoneCTL.text).set(data);
+
+      Get.snackbar('Success', 'Account created successfully',
+          snackPosition: SnackPosition.BOTTOM);
+      Get.to(() => const Login());
+    } catch (e) {
+      log('Error during registration: $e');
+      Get.snackbar('Error', 'Failed to create account. Please try again.',
+          snackPosition: SnackPosition.BOTTOM);
     }
   }
 
-  // Determine the current position of the device.
-  ///
-  /// When the location services are not enabled or permissions
-  /// are denied the `Future` will return an error.
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
-
-    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
       return Future.error('Location services are disabled.');
     }
-
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
         return Future.error('Location permissions are denied');
       }
     }
-
     if (permission == LocationPermission.deniedForever) {
       // Permissions are denied forever, handle appropriately.
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
     return await Geolocator.getCurrentPosition();
   }
 }

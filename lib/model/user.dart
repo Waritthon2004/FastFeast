@@ -1,21 +1,13 @@
-// To parse this JSON data, do
-//
-//     final user = userFromJson(jsonString);
-
-import 'dart:convert';
-
-List<User> userFromJson(String str) =>
-    List<User>.from(json.decode(str).map((x) => User.fromJson(x)));
-
-String userToJson(List<User> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+import 'package:cloud_firestore/cloud_firestore.dart'; // ใช้สำหรับ GeoPoint
 
 class User {
   String address;
-  String location;
+  GeoPoint location;
   String name;
   String password;
   String phone;
+  int type;
+  String url;
 
   User({
     required this.address,
@@ -23,21 +15,33 @@ class User {
     required this.name,
     required this.password,
     required this.phone,
+    required this.type,
+    required this.url,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
-        address: json["address"],
-        location: json["location"],
-        name: json["name"],
-        password: json["password"],
-        phone: json["phone"],
-      );
+  // ฟังก์ชันสำหรับแปลงจาก Firestore Document เป็น Model
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      address: json['address'],
+      location: json['location'], // Firestore เก็บเป็น GeoPoint โดยตรง
+      name: json['name'],
+      password: json['password'],
+      phone: json['phone'],
+      type: json['type'],
+      url: json['url'],
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-        "address": address,
-        "location": location,
-        "name": name,
-        "password": password,
-        "phone": phone,
-      };
+  // ฟังก์ชันสำหรับแปลงจาก Model เป็น JSON (เพื่อนำไปใช้บันทึกใน Firestore)
+  Map<String, dynamic> toJson() {
+    return {
+      'address': address,
+      'location': location, // Firestore รองรับ GeoPoint
+      'name': name,
+      'password': password,
+      'phone': phone,
+      'type': type,
+      'url': url,
+    };
+  }
 }
