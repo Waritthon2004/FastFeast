@@ -3,11 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/login.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'dart:io';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
+import 'package:latlong2/latlong.dart';
+
 class RegisUser extends StatefulWidget {
   const RegisUser({super.key});
 
@@ -23,7 +27,8 @@ class _RegisUserState extends State<RegisUser> {
   var passwdCTL = TextEditingController();
   var LocationCTL = TextEditingController();
   var passwdConfirmCTL = TextEditingController();
-  String url ="";
+  MapController mapController = MapController();
+  String url = "";
   XFile? image;
 
   FirebaseStorage storage = FirebaseStorage.instance;
@@ -32,7 +37,7 @@ class _RegisUserState extends State<RegisUser> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-              GestureDetector(
+        GestureDetector(
           onTap: () {
             Get.defaultDialog(
               title: "Which one",
@@ -85,18 +90,17 @@ class _RegisUserState extends State<RegisUser> {
               color: Color.fromARGB(255, 231, 177, 177),
               shape: BoxShape.circle,
             ),
-            child:  CircleAvatar(
+            child: CircleAvatar(
               radius: 60,
-              backgroundImage: image != null
-              ? FileImage(File(image!.path))
-              : null,
-          child: image == null
-              ? Icon(Icons.person, size: 60, color: Colors.grey[400])
-              : null,
+              backgroundImage:
+                  image != null ? FileImage(File(image!.path)) : null,
+              child: image == null
+                  ? Icon(Icons.person, size: 60, color: Colors.grey[400])
+                  : null,
             ),
           ),
         ),
-                     const SizedBox(height: 16.0),
+        const SizedBox(height: 16.0),
         TextFormField(
           controller: nameCTL,
           decoration: InputDecoration(
@@ -180,40 +184,135 @@ class _RegisUserState extends State<RegisUser> {
           ),
         ),
         SizedBox(height: 10.0),
-         ElevatedButton(
-      onPressed: (){},
-      child: const Text('Select your location'),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        textStyle: const TextStyle(fontSize: 16),
-      )),
-              SizedBox(height: 10.0),
+        ElevatedButton(
+          onPressed: () {
+            LatLng latLng =
+                const LatLng(16.246825669508297, 103.25199289277295);
+            List<Marker> markers = [
+              Marker(
+                point: latLng,
+                width: 40,
+                height: 40,
+                child: Icon(Icons.location_pin, color: Colors.red, size: 40),
+              ),
+            ];
+
+            Get.defaultDialog(
+              title: 'Select your location',
+              content: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Column(
+                    children: [
+                      SizedBox(
+                        width: 300,
+                        height: 300,
+                        child: FlutterMap(
+                          mapController: mapController,
+                          options: MapOptions(
+                            initialCenter: latLng,
+                            initialZoom: 15.0,
+                            onTap: (tapPosition, point) {
+                              setState(() {
+                                latLng = point; // อัพเดต latLng
+                                log(latLng.toString());
+                                markers = [
+                                  Marker(
+                                    point: latLng,
+                                    width: 40,
+                                    height: 40,
+                                    child: Icon(Icons.location_pin,
+                                        color: Colors.red, size: 40),
+                                  ),
+                                ];
+                              });
+                            },
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate:
+                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              userAgentPackageName: 'com.example.app',
+                              maxNativeZoom: 19,
+                            ),
+                            MarkerLayer(markers: markers),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          var position = await _determinePosition();
+                          log("${position.altitude} and ${position.longitude}");
+                          setState(() {
+                            latLng =
+                                LatLng(position.latitude, position.longitude);
+                            markers = [
+                              Marker(
+                                point: latLng,
+                                width: 40,
+                                height: 40,
+                                child: Icon(Icons.location_pin,
+                                    color: Colors.red, size: 40),
+                              ),
+                            ];
+                          });
+                          mapController.move(latLng, mapController.camera.zoom);
+                        },
+                        child: const Text('Get Now location'),
+                      )
+                    ],
+                  );
+                },
+              ),
+              confirm: ElevatedButton(
+                onPressed: () {
+                  Get.back(
+                      result: latLng); // ส่งคืน latLng แทน markers[0].point
+                },
+                child: const Text('Confirm'),
+              ),
+              cancel: ElevatedButton(
+                onPressed: () {
+                  Get.back(); // Close dialog
+                },
+                child: const Text('Cancel'),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            textStyle: const TextStyle(fontSize: 16),
+          ),
+          child: const Text('Select your location'),
+        ),
+        SizedBox(height: 10.0),
 
         // Create Account Button
-       ElevatedButton(
-  onPressed: save,
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.lightBlue,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(18.0),
-    ),
-    padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-    minimumSize: Size(double.infinity, 50), // Set a minimum width and height
-  ),
-  child: const Text(
-    'Create Account',
-    style: TextStyle(
-      color: Colors.white, 
-      fontWeight: FontWeight.bold,
-      fontSize: 16, // Increase font size for better readability
-    ),
-  ),
-),
-       SizedBox(height: 10.0),  
+        ElevatedButton(
+          onPressed: save,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.lightBlue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18.0),
+            ),
+            padding:
+                const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+            minimumSize:
+                Size(double.infinity, 50), // Set a minimum width and height
+          ),
+          child: const Text(
+            'Create Account',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16, // Increase font size for better readability
+            ),
+          ),
+        ),
+        SizedBox(height: 10.0),
       ],
     );
-    
   }
+
   void camera() async {
     final ImagePicker picker = ImagePicker();
     // Pick an image.
@@ -278,8 +377,6 @@ class _RegisUserState extends State<RegisUser> {
       'type': 1,
       'url': imageUrl,
     };
-
-    // Add the new user
     await db.collection('user').doc(PhoneCTL.text).set(data);
     
     Get.snackbar('Success', 'Account created successfully',
@@ -290,5 +387,28 @@ class _RegisUserState extends State<RegisUser> {
     Get.snackbar('Error', 'Failed to create account. Please try again.',
         snackPosition: SnackPosition.BOTTOM);
   }
+
+  
 }
+Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+    return await Geolocator.getCurrentPosition();
+  }
 }

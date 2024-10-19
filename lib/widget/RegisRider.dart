@@ -22,7 +22,6 @@ class RegisRiderState extends State<RegisRider> {
   var liscenseCTL = TextEditingController();
   var passwdCTL = TextEditingController();
   var passwdConfirmCTL = TextEditingController();
-  String url ="";
 
   XFile? image;
 
@@ -85,14 +84,13 @@ class RegisRiderState extends State<RegisRider> {
               color: Color.fromARGB(255, 231, 177, 177),
               shape: BoxShape.circle,
             ),
-            child:  CircleAvatar(
+            child: CircleAvatar(
               radius: 60,
-              backgroundImage: image != null
-              ? FileImage(File(image!.path))
-              : null,
-          child: image == null
-              ? Icon(Icons.person, size: 60, color: Colors.grey[400])
-              : null,
+              backgroundImage:
+                  image != null ? FileImage(File(image!.path)) : null,
+              child: image == null
+                  ? Icon(Icons.person, size: 60, color: Colors.grey[400])
+                  : null,
             ),
           ),
         ),
@@ -178,7 +176,9 @@ class RegisRiderState extends State<RegisRider> {
             ),
           ),
         ),
-        const SizedBox(height: 16,),
+        const SizedBox(
+          height: 16,
+        ),
         ElevatedButton(
           onPressed: save,
           style: ElevatedButton.styleFrom(
@@ -238,7 +238,7 @@ class RegisRiderState extends State<RegisRider> {
         'password': passwdCTL.text,
         'phone': PhoneCTL.text,
         'type': 2,
-        'url':url,
+        'createAt': DateTime.now()
       };
       db.collection('user').doc(PhoneCTL.text).set(data);
       Get.to(const Login());
@@ -267,10 +267,10 @@ class RegisRiderState extends State<RegisRider> {
       Reference firebaseStorageRef =
           FirebaseStorage.instance.ref().child('uploads/$fileName');
       UploadTask uploadTask = firebaseStorageRef.putFile(file);
-      url = await firebaseStorageRef.getDownloadURL();
-      log(url);
-      await uploadTask.whenComplete(() async {});
-      register();
+
+      await uploadTask.whenComplete(() async {}).catchError((error) {
+        log("Failed to upload image: $error");
+      });
     } else {
       log("No image selected.");
     }
