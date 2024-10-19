@@ -19,6 +19,7 @@ class RegisRiderState extends State<RegisRider> {
   var liscenseCTL = TextEditingController();
   var passwdCTL = TextEditingController();
   var passwdConfirmCTL = TextEditingController();
+  
   @override
   Widget build(BuildContext context) {
     return Column(
