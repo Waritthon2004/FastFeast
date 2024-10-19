@@ -22,6 +22,7 @@ class RegisRiderState extends State<RegisRider> {
   var liscenseCTL = TextEditingController();
   var passwdCTL = TextEditingController();
   var passwdConfirmCTL = TextEditingController();
+  String url ="";
 
   XFile? image;
 
@@ -237,7 +238,7 @@ class RegisRiderState extends State<RegisRider> {
         'password': passwdCTL.text,
         'phone': PhoneCTL.text,
         'type': 2,
-        'createAt': DateTime.now()
+        'url':url,
       };
       db.collection('user').doc(PhoneCTL.text).set(data);
       Get.to(const Login());
@@ -264,10 +265,10 @@ class RegisRiderState extends State<RegisRider> {
       Reference firebaseStorageRef =
           FirebaseStorage.instance.ref().child('uploads/$fileName');
       UploadTask uploadTask = firebaseStorageRef.putFile(file);
-      
-      await uploadTask.whenComplete(() async {}).catchError((error) {
-        log("Failed to upload image: $error");
-      });
+      url = await firebaseStorageRef.getDownloadURL();
+      log(url);
+      await uploadTask.whenComplete(() async {});
+      register();
     } else {
       log("No image selected.");
     }
