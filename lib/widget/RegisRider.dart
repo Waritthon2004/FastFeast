@@ -54,7 +54,7 @@ class RegisRiderState extends State<RegisRider> {
             ),
           ),
         ),
-      SizedBox(height: 16.0),
+        SizedBox(height: 16.0),
         TextFormField(
           controller: liscenseCTL,
           decoration: InputDecoration(
@@ -70,7 +70,7 @@ class RegisRiderState extends State<RegisRider> {
             ),
           ),
         ),
-       
+
         SizedBox(height: 16.0),
         TextFormField(
           controller: passwdCTL,
@@ -88,7 +88,7 @@ class RegisRiderState extends State<RegisRider> {
             ),
           ),
         ),
-         SizedBox(height: 16.0),
+        SizedBox(height: 16.0),
         TextFormField(
           controller: passwdConfirmCTL,
           obscureText: true,
@@ -114,64 +114,61 @@ class RegisRiderState extends State<RegisRider> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18.0),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 120.0),
+            padding:
+                const EdgeInsets.symmetric(vertical: 18.0, horizontal: 120.0),
           ),
           child: const Text(
             'Create Account',
-            style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
       ],
     );
   }
 
-
   void register() async {
-  log(passwdConfirmCTL.text);
-  if (nameCTL.text.isEmpty ||
-      passwdCTL.text.isEmpty ||
-      PhoneCTL.text.isEmpty ||
-      liscenseCTL.text.isEmpty ||
-      passwdConfirmCTL.text.isEmpty) {
-    log("กรอกไม่ครบครับ");
-    return;
-  }
-
-  try {
-    var db = FirebaseFirestore.instance;
-
-    // Check if a user with the same phone number already exists
-    var querySnapshot = await db
-        .collection('user')
-        .where('phone', isEqualTo: PhoneCTL.text)
-        .get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      // Phone number already exists
-      log("หมายเลขโทรศัพท์นี้มีอยู่ในระบบแล้ว");
+    log(passwdConfirmCTL.text);
+    if (nameCTL.text.isEmpty ||
+        passwdCTL.text.isEmpty ||
+        PhoneCTL.text.isEmpty ||
+        liscenseCTL.text.isEmpty ||
+        passwdConfirmCTL.text.isEmpty) {
+      log("กรอกไม่ครบครับ");
       return;
     }
 
-    // If no duplicate, proceed to add the new user
-    var data = {
-      'name': nameCTL.text,
-      'license': liscenseCTL.text,
-      'password': passwdCTL.text,
-      'phone': PhoneCTL.text,
-      'type': 2,
-      'createAt': DateTime.now()
-    };
+    try {
+      var db = FirebaseFirestore.instance;
 
-    db.collection('user').add(data).then((DocumentReference doc) {
-      log('Document added with ID: ${doc.id}');
-      Get.to(const Login());
-    }).catchError((error) {
-      log('Error adding document: $error');
-    });
+      // Check if a user with the same phone number already exists
+      var querySnapshot = await db
+          .collection('rider')
+          .where('phone', isEqualTo: PhoneCTL.text)
+          .get();
 
-  } catch (e) {
-    log(e.toString());
+      if (querySnapshot.docs.isNotEmpty) {
+        // Phone number already exists
+        log("หมายเลขโทรศัพท์นี้มีอยู่ในระบบแล้ว");
+        return;
+      }
+
+      // If no duplicate, proceed to add the new user
+      var data = {
+        'name': nameCTL.text,
+        'license': liscenseCTL.text,
+        'password': passwdCTL.text,
+        'phone': PhoneCTL.text,
+        'createAt': DateTime.now()
+      };
+
+      db.collection('rider').add(data).then((DocumentReference doc) {
+        log('Document added with ID: ${doc.id}');
+        Get.to(const Login());
+      }).catchError((error) {
+        log('Error adding document: $error');
+      });
+    } catch (e) {
+      log(e.toString());
+    }
   }
-}
 }

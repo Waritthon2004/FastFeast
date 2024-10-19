@@ -1,5 +1,7 @@
 import 'package:fast_feast/page/home.dart';
 import 'package:fast_feast/page/login.dart';
+import 'package:fast_feast/page/process_send.dart';
+import 'package:fast_feast/page/riderStatus.dart';
 import 'package:fast_feast/page/sender.dart';
 import 'package:fast_feast/page/status.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +41,16 @@ class _linkState extends State<link> {
                 Get.to(const StatusPage());
               },
               child: const Text("Status")),
+          FilledButton(
+              onPressed: () {
+                Get.to(const Riderstatus());
+              },
+              child: const Text("RiderStatus")),
+          FilledButton(
+              onPressed: () {
+                Get.to(const ProcessSendPage());
+              },
+              child: const Text("Process_Send")),
         ],
       ),
     );

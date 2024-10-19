@@ -267,7 +267,6 @@ class _RegisUserState extends State<RegisUser> {
         'location': locationCTL.text,
         'password': passwdCTL.text,
         'phone': phoneCTL.text,
-        'type': 1,
         'createAt': DateTime.now()
       };
 
