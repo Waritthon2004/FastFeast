@@ -1,11 +1,21 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
+import 'package:fast_feast/page/login.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+// ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
+// ignore: depend_on_referenced_packages
+import 'package:path/path.dart';
 class Riderstatus extends StatefulWidget {
   const Riderstatus({super.key});
 
@@ -15,12 +25,13 @@ class Riderstatus extends StatefulWidget {
 
 class _RiderstatusState extends State<Riderstatus> {
   final MapController mapController = MapController();
+  TextEditingController receiver = TextEditingController();
+  TextEditingController des = TextEditingController();
+  int status=0;
   var data;
+   XFile? image;
   @override
- 
-
   LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
-  XFile? image;
   @override
   var db = FirebaseFirestore.instance;
 
@@ -36,7 +47,6 @@ class _RiderstatusState extends State<Riderstatus> {
             const SizedBox(
               height: 20,
             ),
-          
             const SizedBox(
               height: 20,
             ),
@@ -73,82 +83,85 @@ class _RiderstatusState extends State<Riderstatus> {
             ),
             Padding(
               padding: const EdgeInsets.only(top: 10),
-              child: Container(
-                width: 340,
-                height: 155,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3), // changes position of shadow
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Container(
+                  width: 340,
+                  height: 155,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: const Offset(0, 3), // changes position of shadow
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.local_shipping, color: Colors.orange),
+                        SizedBox(width: 8),
+                        Text(
+                          "ตลาดน้อย",
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.local_shipping, color: Colors.orange),
-                      SizedBox(width: 8),
-                      Text(
-                        "ตลาดน้อย",
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Container(
-                      width:
-                          1, // This controls the thickness of the vertical line
-                      height: 50, // This controls the height of the line
-                      color: Colors.grey, // Line color
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  const Row(
-                    children: [
-                      Icon(Icons.location_on, color: Colors.blue),
-                      SizedBox(width: 8),
-                      Text("ตึก IT", style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 56, 104, 248),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  minimumSize: const Size(80, 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(16), // Border radius of 10
-                  ),
-                ),
-                child: const Text(
-                  'อัพเดตสถานะ ',
-                  style:
-                      TextStyle(fontWeight: FontWeight.bold, color: Colors.white,fontSize: 18),
-                ),
-              ),
-                        ],
+                    const SizedBox(height: 3),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Container(
+                        width:
+                            1, // This controls the thickness of the vertical line
+                        height: 50, // This controls the height of the line
+                        color: Colors.grey, // Line color
                       ),
                     ),
+                    const SizedBox(height: 3),
+                    const Row(
+                      children: [
+                        Icon(Icons.location_on, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text("ตึก IT", style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: camera,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 56, 104, 248),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    minimumSize: const Size(80, 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(16), // Border radius of 10
+                    ),
                   ),
+                  child: const Text(
+                    'อัพเดตสถานะ',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, color: Colors.white,fontSize: 18),
+                  ),
+                ),
+                          ],
+                          ),
+                        ),
+                    ),
+              ),
             )
           ],
         ),
@@ -159,7 +172,65 @@ class _RiderstatusState extends State<Riderstatus> {
     );
   }
 
- 
+ void camera() async {
+  final ImagePicker picker = ImagePicker();
+  image = await picker.pickImage(source: ImageSource.camera);
+  if (image != null) {
+    log('Image selected: ${image!.path}');
+    save();
+    setState(() {});
+  } else {
+    log('No image selected');
+  }
+}
+
+void save() async {
+  if (image != null) {
+    File file = File(image!.path);
+    String fileName = basename(file.path);
+    log('File name: $fileName');
+
+    Reference firebaseStorageRef =
+        FirebaseStorage.instance.ref().child('uploads/$fileName');
+
+    UploadTask uploadTask = firebaseStorageRef.putFile(file);
+
+    uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+      log('Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100} %');
+    });
+
+    await uploadTask.whenComplete(() async {
+      try {
+        String downloadURL = await firebaseStorageRef.getDownloadURL();
+        log('Download URL: $downloadURL');
+
+        var data = {
+          'status': 1,
+          'image': downloadURL,
+        };
+
+        db.collection('status').add(data).then((DocumentReference doc) {
+          log('Document added with ID: ${doc.id}');
+        }).catchError((error) {
+          log('Firestore error adding document: $error');
+        });
+      } catch (error) {
+        log('Error getting download URL: $error');
+      }
+    }).catchError((error) {
+      log('Upload error: $error');
+    });
+    updateStatus();
+  } else {
+    log("No image selected.");
+  }
+}
+void updateStatus(){
+  setState(() {
+    status = status+1;
+  });
+}
+
 }
 
 Widget header(BuildContext context) {
