@@ -22,6 +22,11 @@ class RegisRiderState extends State<RegisRider> {
   var liscenseCTL = TextEditingController();
   var passwdCTL = TextEditingController();
   var passwdConfirmCTL = TextEditingController();
+
+  XFile? image;
+
+  FirebaseStorage storage = FirebaseStorage.instance;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -121,7 +126,7 @@ class RegisRiderState extends State<RegisRider> {
             ),
           ),
         ),
-        SizedBox(height: 16.0),
+        const SizedBox(height: 16.0),
         TextFormField(
           controller: liscenseCTL,
           decoration: InputDecoration(
@@ -137,7 +142,7 @@ class RegisRiderState extends State<RegisRider> {
             ),
           ),
         ),
-        SizedBox(height: 16.0),
+        const SizedBox(height: 16.0),
         TextFormField(
           controller: passwdCTL,
           obscureText: true,
@@ -154,7 +159,7 @@ class RegisRiderState extends State<RegisRider> {
             ),
           ),
         ),
-        SizedBox(height: 16.0),
+        const SizedBox(height: 16.0),
         TextFormField(
           controller: passwdConfirmCTL,
           obscureText: true,
@@ -239,6 +244,33 @@ class RegisRiderState extends State<RegisRider> {
       Get.to(const Login());
     } catch (e) {
       log(e.toString());
+    }
+  }
+
+  void camera() async {
+    final ImagePicker picker = ImagePicker();
+    // Pick an image.
+    image = await picker.pickImage(source: ImageSource.camera);
+    log(image.toString());
+    if (image != null) {
+      log(image!.path);
+      setState(() {});
+    }
+  }
+
+  void save() async {
+    if (image != null) {
+      File file = File(image!.path);
+      String fileName = basename(file.path);
+      Reference firebaseStorageRef =
+          FirebaseStorage.instance.ref().child('uploads/$fileName');
+      UploadTask uploadTask = firebaseStorageRef.putFile(file);
+
+      await uploadTask.whenComplete(() async {}).catchError((error) {
+        log("Failed to upload image: $error");
+      });
+    } else {
+      log("No image selected.");
     }
   }
 }

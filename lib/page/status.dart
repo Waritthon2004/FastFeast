@@ -17,7 +17,7 @@ class StatusPage extends StatefulWidget {
 }
 
 class _StatusPageState extends State<StatusPage> {
-  final MapController mapController = MapController();
+  MapController mapController = MapController();
 
   var data;
   @override
