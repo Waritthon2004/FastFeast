@@ -27,6 +27,7 @@ class _SenderPageState extends State<SenderPage> {
   final TextEditingController receiver = TextEditingController();
   final MapController mapController = MapController();
   final FirebaseFirestore db = FirebaseFirestore.instance;
+  String phone = "";
   LatLng currentLocation = const LatLng(16.246825669508297, 103.25199289277295);
 
   List<User> users = [];
@@ -91,7 +92,11 @@ class _SenderPageState extends State<SenderPage> {
                                           ],
                                         ),
                                         FilledButton(
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              setState(() {
+                                                phone = u.phone;
+                                              });
+                                            },
                                             child: Text("เลือก"))
                                       ],
                                     ),
@@ -204,7 +209,8 @@ class _SenderPageState extends State<SenderPage> {
       String downloadURL = await taskSnapshot.ref.getDownloadURL();
 
       await db.collection('send').doc(des.text).set({
-        'name': receiver.text,
+        'receiver': phone,
+        'description': des.text,
         'image': downloadURL,
         'location':
             GeoPoint(currentLocation.latitude, currentLocation.longitude),

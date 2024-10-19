@@ -325,48 +325,6 @@ class _RegisUserState extends State<RegisUser> {
     Get.back();
   }
 
-  void register() async {
-    log(passwdConfirmCTL.text);
-    if (nameCTL.text.isEmpty ||
-        passwdCTL.text.isEmpty ||
-        PhoneCTL.text.isEmpty ||
-        AddressCTL.text.isEmpty ||
-        passwdConfirmCTL.text.isEmpty) {
-      log("กรอกไม่ครบครับ");
-      return;
-    }
-
-    try {
-      var db = FirebaseFirestore.instance;
-
-      // Check if a user with the same phone number already exists
-      var querySnapshot = await db
-          .collection('user')
-          .where('phone', isEqualTo: PhoneCTL.text)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        // Phone number already exists
-        log("หมายเลขโทรศัพท์นี้มีอยู่ในระบบแล้ว");
-        return;
-      }
-
-      // If no duplicate, proceed to add the new user
-      var data = {
-        'name': nameCTL.text,
-        'address': AddressCTL.text,
-        'location': LocationCTL.text,
-        'password': passwdCTL.text,
-        'phone': PhoneCTL.text,
-        'url': url,
-      };
-      db.collection('user').doc(PhoneCTL.text).set(data);
-      Get.to(const Login());
-    } catch (e) {
-      log(e.toString());
-    }
-  }
-
   void save() async {
     if (image != null) {
       File file = File(image!.path);
@@ -377,7 +335,45 @@ class _RegisUserState extends State<RegisUser> {
       url = await firebaseStorageRef.getDownloadURL();
       log(url);
       await uploadTask.whenComplete(() async {});
-      register();
+      log(passwdConfirmCTL.text);
+      if (nameCTL.text.isEmpty ||
+          passwdCTL.text.isEmpty ||
+          PhoneCTL.text.isEmpty ||
+          AddressCTL.text.isEmpty ||
+          passwdConfirmCTL.text.isEmpty) {
+        log("กรอกไม่ครบครับ");
+        return;
+      }
+
+      try {
+        var db = FirebaseFirestore.instance;
+
+        // Check if a user with the same phone number already exists
+        var querySnapshot = await db
+            .collection('user')
+            .where('phone', isEqualTo: PhoneCTL.text)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          // Phone number already exists
+          log("หมายเลขโทรศัพท์นี้มีอยู่ในระบบแล้ว");
+          return;
+        }
+
+        // If no duplicate, proceed to add the new user
+        var data = {
+          'name': nameCTL.text,
+          'address': AddressCTL.text,
+          'location': LocationCTL.text,
+          'password': passwdCTL.text,
+          'phone': PhoneCTL.text,
+          'url': url,
+        };
+        db.collection('user').doc(PhoneCTL.text).set(data);
+        Get.to(const Login());
+      } catch (e) {
+        log(e.toString());
+      }
     } else {
       log("No image selected.");
     }
