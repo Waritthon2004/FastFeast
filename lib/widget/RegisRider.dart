@@ -105,23 +105,26 @@ class RegisRiderState extends State<RegisRider> {
             ),
           ),
         ),
-        SizedBox(height: 32.0),
-        // Create Account Button
-        ElevatedButton(
-          onPressed: register,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.lightBlue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18.0),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 120.0),
-          ),
-          child: const Text(
-            'Create Account',
-            style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-        ),
+        SizedBox(height: 16,),
+            ElevatedButton(
+  onPressed: register,
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.lightBlue,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(18.0),
+    ),
+    padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+    minimumSize: Size(double.infinity, 50), // Set a minimum width and height
+  ),
+  child: const Text(
+    'Create Account',
+    style: TextStyle(
+      color: Colors.white, 
+      fontWeight: FontWeight.bold,
+      fontSize: 16, // Increase font size for better readability
+    ),
+  ),
+)
       ],
     );
   }
@@ -162,14 +165,8 @@ class RegisRiderState extends State<RegisRider> {
       'type': 2,
       'createAt': DateTime.now()
     };
-
-    db.collection('user').add(data).then((DocumentReference doc) {
-      log('Document added with ID: ${doc.id}');
-      Get.to(const Login());
-    }).catchError((error) {
-      log('Error adding document: $error');
-    });
-
+    db.collection('user').doc(PhoneCTL.text).set(data);
+    Get.to(const Login());
   } catch (e) {
     log(e.toString());
   }

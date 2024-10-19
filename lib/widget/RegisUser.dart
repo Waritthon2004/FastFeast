@@ -72,22 +72,7 @@ class _RegisUserState extends State<RegisUser> {
           ),
         ),
         SizedBox(height: 16.0),
-        // TextFormField(
-        //   controller: LocationCTL,
-        //   decoration: InputDecoration(
-        //     prefixIcon: Icon(Icons.location_on_outlined),
-        //     labelText: 'Your Location',
-        //     enabledBorder: OutlineInputBorder(
-        //       borderRadius: BorderRadius.circular(18),
-        //       borderSide: BorderSide(color: Colors.grey.shade300),
-        //     ),
-        //     focusedBorder: OutlineInputBorder(
-        //       borderRadius: BorderRadius.circular(18.0),
-        //       borderSide: BorderSide(color: Colors.grey.shade300),
-        //     ),
-        //   ),
-        // ),
-        // SizedBox(height: 16.0),
+
         TextFormField(
           controller: passwdCTL,
           obscureText: true,
@@ -132,20 +117,25 @@ class _RegisUserState extends State<RegisUser> {
               SizedBox(height: 10.0),
 
         // Create Account Button
-        ElevatedButton(
-          onPressed: register,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.lightBlue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18.0),
-            ),
-            padding: EdgeInsets.symmetric(vertical: 18.0, horizontal: 120.0),
-          ),
-          child: const Text(
-            'Create Account',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-        ),
+       ElevatedButton(
+  onPressed: register,
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.lightBlue,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(18.0),
+    ),
+    padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+    minimumSize: Size(double.infinity, 50), // Set a minimum width and height
+  ),
+  child: const Text(
+    'Create Account',
+    style: TextStyle(
+      color: Colors.white, 
+      fontWeight: FontWeight.bold,
+      fontSize: 16, // Increase font size for better readability
+    ),
+  ),
+)
         
       ],
     );
@@ -171,7 +161,6 @@ void register() async {
     var querySnapshot = await db
         .collection('user')
         .where('phone', isEqualTo: PhoneCTL.text)
-  
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -190,14 +179,8 @@ void register() async {
       'type': 1,
       'createAt': DateTime.now()
     };
-
-    db.collection('user').add(data).then((DocumentReference doc) {
-      log('Document added with ID: ${doc.id}');
-      Get.to(const Login());
-    }).catchError((error) {
-      log('Error adding document: $error');
-    });
-
+  db.collection('user').doc(PhoneCTL.text).set(data);
+  Get.to(Login());Get.to(Login());
   } catch (e) {
     log(e.toString());
   }
