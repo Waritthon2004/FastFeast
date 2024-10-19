@@ -130,13 +130,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
               ),
 
-              const SizedBox(height: 16.0),
-              // Profile Picture Placeholder
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.grey.shade300,
-                child: const Icon(Icons.person, size: 60, color: Colors.grey),
-              ),
+            
 
               const SizedBox(height: 16.0),
               // Input Fields

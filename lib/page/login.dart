@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/home.dart';
 import 'package:fast_feast/page/homeRider.dart';
 import 'package:fast_feast/page/register.dart';
+import 'package:fast_feast/shared/appData.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -73,8 +74,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
             ),
-                        const SizedBox(height: 25.0),
-
+            const SizedBox(height: 25.0),
             ElevatedButton(
               onPressed: login,
               style: ElevatedButton.styleFrom(
@@ -114,17 +114,18 @@ class _LoginState extends State<Login> {
   }
 
  void login() async {
-  CollectionReference users = FirebaseFirestore.instance.collection('user');
-
-  // Query the collection with conditions on phone and password
+  try {
+    CollectionReference users = FirebaseFirestore.instance.collection('user');
   QuerySnapshot querySnapshot = await users.where('phone', isEqualTo: PhoneCTL.text).where('password', isEqualTo: passwdCTL.text).get();
-  log(PhoneCTL.text);
-  log(passwdCTL.text);
-  // Check if any documents match the query
   if (querySnapshot.docs.isNotEmpty) {
-      log("User name: ${ querySnapshot.docs[0]['name']}");
+       UserInfo info = UserInfo();
+       info.image = "${ querySnapshot.docs[0]['url']}";
+       info.name = "${ querySnapshot.docs[0]['name']}";
+       info.phone = "${ querySnapshot.docs[0]['phone']}";
+       log(info.image);
       if(querySnapshot.docs[0]['type'] == 1){
-        Get.to(const HomePage());
+       
+         Get.to(const HomePage());
       }
       else if(querySnapshot.docs[0]['type'] == 2){
         Get.to(const Homerider());
@@ -132,6 +133,10 @@ class _LoginState extends State<Login> {
   } else {
     log('No matching user found.');
   }
+  } catch (e) {
+    log(e.toString());
+  }
+  
 }
 
 }

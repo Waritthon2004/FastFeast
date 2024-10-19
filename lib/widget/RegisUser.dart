@@ -1,12 +1,15 @@
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/login.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:latlong2/latlong.dart'; // Changed from google_maps_flutter
+import 'dart:io';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
 
 class RegisUser extends StatefulWidget {
   const RegisUser({Key? key}) : super(key: key); // Fixed key parameter
@@ -16,22 +19,85 @@ class RegisUser extends StatefulWidget {
 }
 
 class _RegisUserState extends State<RegisUser> {
-  TextEditingController nameCTL = TextEditingController();
-  TextEditingController phoneCTL =
-      TextEditingController(); // Fixed capitalization
-  TextEditingController addressCTL =
-      TextEditingController(); // Fixed capitalization
-  TextEditingController locationCTL =
-      TextEditingController(); // Fixed capitalization
-  TextEditingController passwdCTL = TextEditingController();
-  TextEditingController passwdConfirmCTL = TextEditingController();
+  var nameCTL = TextEditingController();
+  var PhoneCTL = TextEditingController();
+  var AddressCTL = TextEditingController();
+  var passwdCTL = TextEditingController();
+  var LocationCTL = TextEditingController();
+  var passwdConfirmCTL = TextEditingController();
+  String url = "";
+  XFile? image;
 
-  MapController mapController = MapController();
+  FirebaseStorage storage = FirebaseStorage.instance;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        GestureDetector(
+          onTap: () {
+            Get.defaultDialog(
+              title: "Which one",
+              content: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    FilledButton.icon(
+                      onPressed: () {
+                        // Add your gallery function here
+                      },
+                      icon:
+                          const Icon(Icons.photo_library, color: Colors.white),
+                      label: const Text("Gallery"),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(90, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 3,
+                      ),
+                    ),
+                    FilledButton.icon(
+                      onPressed: () {
+                        camera();
+                      },
+                      icon: const Icon(Icons.camera_alt, color: Colors.white),
+                      label: const Text("Camera"),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(90, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(255, 231, 177, 177),
+              shape: BoxShape.circle,
+            ),
+            child: CircleAvatar(
+              radius: 60,
+              backgroundImage:
+                  image != null ? FileImage(File(image!.path)) : null,
+              child: image == null
+                  ? Icon(Icons.person, size: 60, color: Colors.grey[400])
+                  : null,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16.0),
         TextFormField(
           controller: nameCTL,
           decoration: InputDecoration(
@@ -49,7 +115,7 @@ class _RegisUserState extends State<RegisUser> {
         ),
         const SizedBox(height: 16.0),
         TextFormField(
-          controller: phoneCTL,
+          controller: PhoneCTL,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.phone),
             labelText: 'Phone Number',
@@ -65,7 +131,7 @@ class _RegisUserState extends State<RegisUser> {
         ),
         const SizedBox(height: 16.0),
         TextFormField(
-          controller: addressCTL,
+          controller: AddressCTL,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.home_outlined),
             labelText: 'Address',
@@ -141,29 +207,49 @@ class _RegisUserState extends State<RegisUser> {
 
         // Create Account Button
         ElevatedButton(
-          onPressed: register,
+          onPressed: save,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.lightBlue,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18.0),
             ),
-            padding: EdgeInsets.symmetric(vertical: 18.0, horizontal: 120.0),
+            padding:
+                const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+            minimumSize:
+                Size(double.infinity, 50), // Set a minimum width and height
           ),
           child: const Text(
             'Create Account',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16, // Increase font size for better readability
+            ),
           ),
         ),
+        SizedBox(height: 10.0),
       ],
     );
+  }
+
+  void camera() async {
+    final ImagePicker picker = ImagePicker();
+    // Pick an image.
+    image = await picker.pickImage(source: ImageSource.camera);
+    log(image.toString());
+    if (image != null) {
+      log(image!.path);
+      setState(() {});
+    }
+    Get.back();
   }
 
   void register() async {
     log(passwdConfirmCTL.text);
     if (nameCTL.text.isEmpty ||
         passwdCTL.text.isEmpty ||
-        phoneCTL.text.isEmpty ||
-        addressCTL.text.isEmpty ||
+        PhoneCTL.text.isEmpty ||
+        AddressCTL.text.isEmpty ||
         passwdConfirmCTL.text.isEmpty) {
       log("กรอกไม่ครบครับ");
       return;
@@ -183,7 +269,7 @@ class _RegisUserState extends State<RegisUser> {
         log("หมายเลขโทรศัพท์นี้มีอยู่ในระบบแล้ว");
         return;
       }
-
+      save();
       // If no duplicate, proceed to add the new user
       var data = {
         'name': nameCTL.text,
@@ -191,18 +277,28 @@ class _RegisUserState extends State<RegisUser> {
         'location': LocationCTL.text,
         'password': passwdCTL.text,
         'phone': PhoneCTL.text,
-        'type': 1,
-        'createAt': DateTime.now()
+        'url': url,
       };
-
-      db.collection('user').add(data).then((DocumentReference doc) {
-        log('Document added with ID: ${doc.id}');
-        Get.to(const Login());
-      }).catchError((error) {
-        log('Error adding document: $error');
-      });
+      db.collection('user').doc(PhoneCTL.text).set(data);
+      Get.to(const Login());
     } catch (e) {
       log(e.toString());
+    }
+  }
+
+  void save() async {
+    if (image != null) {
+      File file = File(image!.path);
+      String fileName = basename(file.path);
+      Reference firebaseStorageRef =
+          FirebaseStorage.instance.ref().child('uploads/$fileName');
+      UploadTask uploadTask = firebaseStorageRef.putFile(file);
+      url = await firebaseStorageRef.getDownloadURL();
+      log(url);
+      await uploadTask.whenComplete(() async {});
+      register();
+    } else {
+      log("No image selected.");
     }
   }
 }
