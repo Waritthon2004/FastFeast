@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';

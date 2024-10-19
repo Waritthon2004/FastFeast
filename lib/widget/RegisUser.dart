@@ -225,62 +225,70 @@ class _RegisUserState extends State<RegisUser> {
     }
     Get.back();
   }
-void register() async {
-  log(passwdConfirmCTL.text);
+  void save() async {
   if (nameCTL.text.isEmpty ||
       passwdCTL.text.isEmpty ||
       PhoneCTL.text.isEmpty ||
       AddressCTL.text.isEmpty ||
       passwdConfirmCTL.text.isEmpty) {
-    log("กรอกไม่ครบครับ");
+    Get.snackbar('Error', 'Please fill in all fields',
+        snackPosition: SnackPosition.BOTTOM);
+    return;
+  }
+
+  if (passwdCTL.text != passwdConfirmCTL.text) {
+    Get.snackbar('Error', 'Passwords do not match',
+        snackPosition: SnackPosition.BOTTOM);
     return;
   }
 
   try {
     var db = FirebaseFirestore.instance;
-
-    // Check if a user with the same phone number already exists
     var querySnapshot = await db
         .collection('user')
         .where('phone', isEqualTo: PhoneCTL.text)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      // Phone number already exists
-      log("หมายเลขโทรศัพท์นี้มีอยู่ในระบบแล้ว");
+      Get.snackbar('Error', 'This phone number is already registered',
+          snackPosition: SnackPosition.BOTTOM);
       return;
     }
-    save();
-    // If no duplicate, proceed to add the new user
+    String imageUrl = '';
+    if (image != null) {
+      File file = File(image!.path);
+      String fileName = '${DateTime.now().millisecondsSinceEpoch}_${basename(file.path)}';
+      Reference firebaseStorageRef =
+          FirebaseStorage.instance.ref().child('uploads/$fileName');
+      
+      UploadTask uploadTask = firebaseStorageRef.putFile(file);
+      
+      TaskSnapshot taskSnapshot = await uploadTask;
+      imageUrl = await taskSnapshot.ref.getDownloadURL();
+      log('Image uploaded. URL: $imageUrl');
+    }
+
+    // Prepare user data
     var data = {
       'name': nameCTL.text,
       'address': AddressCTL.text,
       'location': LocationCTL.text,
       'password': passwdCTL.text,
       'phone': PhoneCTL.text,
-      'url':url,
-
+      'type': 1,
+      'url': imageUrl,
     };
-  db.collection('user').doc(PhoneCTL.text).set(data);
-  Get.to(const Login());
+
+    // Add the new user
+    await db.collection('user').doc(PhoneCTL.text).set(data);
+    
+    Get.snackbar('Success', 'Account created successfully',
+        snackPosition: SnackPosition.BOTTOM);
+    Get.to(() => const Login());
   } catch (e) {
-    log(e.toString());
+    log('Error during registration: $e');
+    Get.snackbar('Error', 'Failed to create account. Please try again.',
+        snackPosition: SnackPosition.BOTTOM);
   }
 }
-
-  void save() async {
-    if (image != null) {
-      File file = File(image!.path);
-      String fileName = basename(file.path);
-      Reference firebaseStorageRef =
-          FirebaseStorage.instance.ref().child('uploads/$fileName');
-      UploadTask uploadTask = firebaseStorageRef.putFile(file);
-      url = await firebaseStorageRef.getDownloadURL();
-      log(url);
-      await uploadTask.whenComplete(() async {});
-      register();
-    } else {
-      log("No image selected.");
-    }
-  }
 }
