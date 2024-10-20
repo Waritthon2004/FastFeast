@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
+import 'package:fast_feast/shared/appData.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,6 +14,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late UserInfo user;
+  void initState() {
+    super.initState();
+    user = context.read<AppData>().user;
+    log("aaa : ${user.name}");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

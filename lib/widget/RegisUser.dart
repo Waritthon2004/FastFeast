@@ -384,8 +384,9 @@ class _RegisUserState extends State<RegisUser> {
         'type': 1,
         'url': imageUrl,
       };
-      await db.collection('user').doc(PhoneCTL.text).set(data);
+      log(data.toString());
 
+      await db.collection('user').doc(PhoneCTL.text).set(data);
       Get.snackbar('Success', 'Account created successfully',
           snackPosition: SnackPosition.BOTTOM);
       Get.to(() => const Login());
