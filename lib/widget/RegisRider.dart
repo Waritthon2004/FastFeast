@@ -41,8 +41,15 @@ class RegisRiderState extends State<RegisRider> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     FilledButton.icon(
-                      onPressed: () {
-                        // Add your gallery function here
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        // Pick an image.
+                        image =
+                            await picker.pickImage(source: ImageSource.gallery);
+                        if (image != null) {
+                          log(image!.path);
+                          setState(() {});
+                        }
                       },
                       icon:
                           const Icon(Icons.photo_library, color: Colors.white),
@@ -262,21 +269,20 @@ class RegisRiderState extends State<RegisRider> {
   void save() async {
     try {
       if (image != null) {
-      File file = File(image!.path);
-      String fileName = basename(file.path);
-      Reference firebaseStorageRef =
-          FirebaseStorage.instance.ref().child('uploads/$fileName');
-      UploadTask uploadTask = firebaseStorageRef.putFile(file);
+        File file = File(image!.path);
+        String fileName = basename(file.path);
+        Reference firebaseStorageRef =
+            FirebaseStorage.instance.ref().child('uploads/$fileName');
+        UploadTask uploadTask = firebaseStorageRef.putFile(file);
 
-      await uploadTask.whenComplete(() async {}).catchError((error) {
-        log("Failed to upload image: $error");
-      });
-    } else {
-      log("No image selected.");
-    }
+        await uploadTask.whenComplete(() async {}).catchError((error) {
+          log("Failed to upload image: $error");
+        });
+      } else {
+        log("No image selected.");
+      }
     } catch (e) {
       log(e.toString());
     }
-    
   }
 }

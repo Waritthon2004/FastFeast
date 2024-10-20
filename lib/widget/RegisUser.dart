@@ -47,8 +47,15 @@ class _RegisUserState extends State<RegisUser> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     FilledButton.icon(
-                      onPressed: () {
-                        // Add your gallery function here
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        // Pick an image.
+                        image =
+                            await picker.pickImage(source: ImageSource.gallery);
+                        if (image != null) {
+                          log(image!.path);
+                          setState(() {});
+                        }
                       },
                       icon:
                           const Icon(Icons.photo_library, color: Colors.white),
