@@ -6,6 +6,7 @@ import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/barRider.dart';
 import 'package:fast_feast/page/drawer.dart';
 import 'package:fast_feast/page/login.dart';
+import 'package:fast_feast/shared/appData.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -34,8 +35,9 @@ class _RiderstatusState extends State<Riderstatus> {
   XFile? image;
   @override
   LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
-  @override
+
   var db = FirebaseFirestore.instance;
+  late UserInfo user;
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,52 +198,52 @@ class _RiderstatusState extends State<Riderstatus> {
   }
 
   void save() async {
-  var position = await _determinePosition();
-  log("${position.latitude} and ${position.longitude}");
-  latLng = LatLng(position.latitude, position.longitude);
-  mapController.move(latLng, mapController.camera.zoom);
-  setState(() {});
+    var position = await _determinePosition();
+    log("${position.latitude} and ${position.longitude}");
+    latLng = LatLng(position.latitude, position.longitude);
+    mapController.move(latLng, mapController.camera.zoom);
+    setState(() {});
 
-  if (image != null) {
-    File file = File(image!.path);
-    String fileName = basename(file.path);
-    log('File name: $fileName');
+    if (image != null) {
+      File file = File(image!.path);
+      String fileName = basename(file.path);
+      log('File name: $fileName');
 
-    Reference firebaseStorageRef =
-        FirebaseStorage.instance.ref().child('uploads/$fileName');
+      Reference firebaseStorageRef =
+          FirebaseStorage.instance.ref().child('uploads/$fileName');
 
-    UploadTask uploadTask = firebaseStorageRef.putFile(file);
+      UploadTask uploadTask = firebaseStorageRef.putFile(file);
 
-    uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-      log('Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100} %');
-    });
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        log('Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100} %');
+      });
 
-    await uploadTask.whenComplete(() async {
-      try {
-        String downloadURL = await firebaseStorageRef.getDownloadURL();
-        log('Download URL: $downloadURL');
+      await uploadTask.whenComplete(() async {
+        try {
+          String downloadURL = await firebaseStorageRef.getDownloadURL();
+          log('Download URL: $downloadURL');
 
-        var data = {
-          'status': 1,
-          'image': downloadURL,
-          'location': {
-            'latitude': position.latitude,
-            'longitude': position.longitude,
-          },
-        };
+          var data = {
+            'status': 1,
+            'image': downloadURL,
+            'location': {
+              'latitude': position.latitude,
+              'longitude': position.longitude,
+            },
+          };
 
-        db.collection('status').doc("2").set(data);
-      } catch (error) {
-        log('Error getting download URL: $error');
-      }
-    }).catchError((error) {
-      log('Upload error: $error');
-    });
-    updateStatus();
-  } else {
-    log("No image selected.");
+          db.collection('status').doc("2").set(data);
+        } catch (error) {
+          log('Error getting download URL: $error');
+        }
+      }).catchError((error) {
+        log('Upload error: $error');
+      });
+      updateStatus();
+    } else {
+      log("No image selected.");
+    }
   }
-}
 
   void updateStatus() {
     setState(() {

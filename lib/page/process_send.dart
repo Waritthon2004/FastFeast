@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fast_feast/model/status.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +15,11 @@ class ProcessSendPage extends StatefulWidget {
 
 class _ProcessSendPageState extends State<ProcessSendPage> {
   FirebaseFirestore db = FirebaseFirestore.instance;
+  List<Status> status = [];
   @override
   void initState() {
     super.initState();
+    queryData();
   }
 
   Widget build(BuildContext context) {
@@ -30,7 +35,6 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
               padding: const EdgeInsets.only(top: 10),
               child: Container(
                 width: 300,
-                height: 500,
                 decoration: BoxDecoration(
                   color: Colors.white, // สีพื้นหลัง
                   borderRadius: BorderRadius.circular(15), // ขอบโค้ง
@@ -48,59 +52,92 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
     );
   }
 
-  // void data() async {
-  //   var inboxRef = db.collection("user");
-
-  //   // ค้นหาชื่อที่มีส่วนคล้ายกันโดยเริ่มต้นด้วยค่าที่กรอก
-  //   var query = inboxRef
-  //       .where("phone", isGreaterThanOrEqualTo: receiver.text)
-  //       .where("phone", isLessThan: receiver.text + 'z');
-
-  //   var result = await query.get();
-  // }
-}
-
-Widget content() {
-  return Padding(
-    padding: const EdgeInsets.only(top: 20),
-    child: Container(
-        width: 250,
-        height: 70,
-        decoration: BoxDecoration(
-          color: Colors.white, // สีพื้นหลัง
-          borderRadius: BorderRadius.circular(15), // ขอบโค้ง
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5), // สีเงา
-              spreadRadius: 1, // ความกว้างของเงา
-              blurRadius: 7, // ระยะเบลอของเงา
-              offset: const Offset(0, 5), // ตำแหน่งของเงา (x, y)
+  Widget content() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        children: status.map((u) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Container(
+              width: 250,
+              height: 70,
+              decoration: BoxDecoration(
+                color: Colors.white, // สีพื้นหลัง
+                borderRadius: BorderRadius.circular(15), // ขอบโค้ง
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5), // สีเงา
+                    spreadRadius: 1, // ความกว้างของเงา
+                    blurRadius: 7, // ระยะเบลอของเงา
+                    offset: const Offset(0, 5), // ตำแหน่งของเงา (x, y)
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Image.network(
+                      "https://i.pinimg.com/enabled_lo/564x/7a/c8/30/7ac8304987fd3eb12b13ac28b9e06f02.jpg"),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(u.description),
+                      Text(u.sender),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_pin,
+                              color: Color.fromARGB(255, 41, 94, 240),
+                              size: 30),
+                          Text(u.destination),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const Icon(Icons.search,
+                      color: Color.fromARGB(255, 41, 94, 240), size: 30)
+                ],
+              ),
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Image.network(
-                "https://i.pinimg.com/enabled_lo/564x/7a/c8/30/7ac8304987fd3eb12b13ac28b9e06f02.jpg"),
-            const Column(
-              children: [
-                Text("Ice bear"),
-                Text("Ruj"),
-                Row(
-                  children: [
-                    Icon(Icons.location_pin,
-                        color: Color.fromARGB(255, 41, 94, 240), size: 30),
-                    Text("Roi-et")
-                  ],
-                ),
-              ],
-            ),
-            Icon(Icons.search,
-                color: Color.fromARGB(255, 41, 94, 240), size: 30)
-          ],
-        )),
-  );
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Future<void> queryData() async {
+    try {
+      var inboxRef = db.collection("status");
+      var query = inboxRef.where("status", isNotEqualTo: 4);
+
+      var result = await query.get();
+
+      if (result.docs.isNotEmpty) {
+        setState(() {
+          status = result.docs
+              .map((doc) {
+                try {
+                  return Status.fromJson(doc.data() as Map<String, dynamic>);
+                } catch (e) {
+                  log("Error parsing user data: $e");
+                  return null;
+                }
+              })
+              .whereType<Status>()
+              .toList();
+        });
+        log('status found: ${status.length}');
+      } else {
+        setState(() {
+          status = [];
+        });
+        log('No status found.');
+      }
+    } catch (e) {
+      log("Error querying data: $e");
+    }
+  }
 }
 
 Widget header(BuildContext context) {

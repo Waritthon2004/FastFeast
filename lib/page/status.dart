@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fast_feast/model/status.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
 import 'package:flutter/material.dart';
@@ -17,19 +18,20 @@ class StatusPage extends StatefulWidget {
 
 class _StatusPageState extends State<StatusPage> {
   MapController mapController = MapController();
-
+  List<Status> status = [];
   var data;
   @override
   void initState() {
     super.initState();
-    readdata();
+    queryData();
   }
 
   LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
+  late LatLng send;
+  late LatLng recvied;
   XFile? image;
   @override
   var db = FirebaseFirestore.instance;
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -55,69 +57,83 @@ class _StatusPageState extends State<StatusPage> {
       ),
       body: SingleChildScrollView(
         child: Column(
-          children: [
-            header(context),
-            const SizedBox(
-              height: 20,
-            ),
-            const CustomStatusBar(
-              icons: [
-                Icons.hourglass_empty,
-                Icons.phone_android,
-                Icons.motorcycle,
-                Icons.check_circle,
-              ],
-              currentStep: 0,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              width: 300,
-              height: 300,
-              child: FlutterMap(
-                mapController: mapController,
-                options: MapOptions(
-                  initialCenter: latLng,
-                  initialZoom: 15.0,
+          children: status.map((u) {
+            return Column(
+              children: [
+                header(context),
+                const SizedBox(
+                  height: 20,
                 ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.example.app',
-                    maxNativeZoom: 19,
-                  ),
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: latLng,
-                        width: 10,
-                        height: 10,
-                        child: const Icon(Icons.location_pin,
-                            color: Colors.red, size: 30),
+                const CustomStatusBar(
+                  icons: [
+                    Icons.hourglass_empty,
+                    Icons.phone_android,
+                    Icons.motorcycle,
+                    Icons.check_circle,
+                  ],
+                  currentStep: 0,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: FlutterMap(
+                    mapController: mapController,
+                    options: MapOptions(
+                      initialCenter: latLng,
+                      initialZoom: 15.0,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.app',
+                        maxNativeZoom: 19,
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: LatLng(u.receiverlocation.latitude,
+                                u.receiverlocation.longitude),
+                            width: 10,
+                            height: 10,
+                            child: const Icon(Icons.location_pin,
+                                color: Colors.red, size: 30),
+                          ),
+                          Marker(
+                            point: LatLng(u.senderlocation.latitude,
+                                u.senderlocation.longitude),
+                            width: 10,
+                            height: 10,
+                            child: const Icon(Icons.location_pin,
+                                color: Color.fromARGB(255, 72, 16, 225),
+                                size: 30),
+                          )
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(top: 10, left: 30),
-                child: Text("สถานะการส่งของ"),
-              ),
-            ),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(top: 10, left: 30),
-                child: Text("รอไรเดอร์มารับ"),
-              ),
-            ),
-            content2(),
-          ],
+                ),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 10, left: 30),
+                    child: Text("สถานะการส่งของ"),
+                  ),
+                ),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 10, left: 30),
+                    child: Text("รอไรเดอร์มารับ"),
+                  ),
+                ),
+                content2(),
+              ],
+            );
+          }).toList(),
         ),
       ),
       drawer: const MyDrawer(),
@@ -125,17 +141,38 @@ class _StatusPageState extends State<StatusPage> {
     );
   }
 
-  void readdata() async {
+  Future<void> queryData() async {
     try {
-      var result = await db.collection('send').doc('เมาส์').get();
+      var inboxRef = db.collection("status");
+      var query = inboxRef
+          .where("receiver", isEqualTo: "095")
+          .where("description", isEqualTo: "com");
 
-      if (result.exists) {
-        data = result.data();
+      var result = await query.get();
+
+      if (result.docs.isNotEmpty) {
+        setState(() {
+          status = result.docs
+              .map((doc) {
+                try {
+                  return Status.fromJson(doc.data() as Map<String, dynamic>);
+                } catch (e) {
+                  log("Error parsing user data: $e");
+                  return null;
+                }
+              })
+              .whereType<Status>()
+              .toList();
+        });
+        log('status found: ${status.length}');
       } else {
-        log('ไม่มีเอกสาร');
+        setState(() {
+          status = [];
+        });
+        log('No status found.');
       }
-    } catch (err) {
-      log(err.toString());
+    } catch (e) {
+      log("Error querying data: $e");
     }
   }
 

@@ -277,6 +277,8 @@ class _SenderPageState extends State<SenderPage> {
       });
 
       await db.collection('status').doc().set({
+        'origin': user.address,
+        'destination': "MSU",
         'receiver': phone,
         'description': des.text,
         'image': downloadURL,
