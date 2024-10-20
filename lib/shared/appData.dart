@@ -1,5 +1,4 @@
-// ignore: file_names
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; 
 
 class AppData with ChangeNotifier {
   UserInfo user = UserInfo();

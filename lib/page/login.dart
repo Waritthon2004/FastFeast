@@ -119,10 +119,10 @@ class _LoginState extends State<Login> {
   QuerySnapshot querySnapshot = await users.where('phone', isEqualTo: PhoneCTL.text).where('password', isEqualTo: passwdCTL.text).get();
   if (querySnapshot.docs.isNotEmpty) {
        UserInfo info = UserInfo();
-       info.image = "${ querySnapshot.docs[0]['url']}";
-       info.name = "${ querySnapshot.docs[0]['name']}";
-       info.phone = "${ querySnapshot.docs[0]['phone']}";
-       log(info.image);
+       info.image = querySnapshot.docs[0]['url'];
+       info.name = querySnapshot.docs[0]['name'];
+       info.phone = querySnapshot.docs[0]['phone'];
+    
       if(querySnapshot.docs[0]['type'] == 1){
        
          Get.to(const HomePage());
