@@ -29,7 +29,7 @@ class _SenderPageState extends State<SenderPage> {
   final FirebaseFirestore db = FirebaseFirestore.instance;
   String phone = "";
   LatLng currentLocation = const LatLng(16.246825669508297, 103.25199289277295);
-
+  late LatLng latLng;
   List<User> users = [];
   String stay = "Mahasarakham University";
   @override
@@ -67,44 +67,84 @@ class _SenderPageState extends State<SenderPage> {
                     child: users.isNotEmpty
                         ? Column(
                             children: users.map((u) {
-                              return Column(
-                                children: [
-                                  Container(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Container(
-                                          width: 50,
-                                          height: 50,
-                                          child: Image.network(
-                                              "https://i.pinimg.com/enabled_lo/474x/1a/cd/ee/1acdeec352e027b19b1a1ec0e1c3e038.jpg"),
-                                        ),
-                                        Column(
-                                          children: [
-                                            Text(u.phone),
-                                            Text(u.name),
-                                            Row(children: [
-                                              Icon(Icons.location_pin,
-                                                  color: Colors.red, size: 20),
-                                              Text(u.address)
-                                            ])
-                                          ],
-                                        ),
-                                        FilledButton(
-                                            onPressed: () {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white, // สีพื้นหลัง
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.grey.withOpacity(0.5), // สีเงา
+                                      spreadRadius:
+                                          0, // จำกัดเงาให้อยู่เฉพาะด้านล่าง
+                                      blurRadius: 7, // ระยะเบลอของเงา
+                                      offset: Offset(0,
+                                          5), // เลื่อนเงาเฉพาะด้านล่าง (y เป็นบวก)
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Container(
+                                            width: 50,
+                                            height: 50,
+                                            child: ClipOval(
+                                              child: Image.network(
+                                                "https://i.pinimg.com/enabled_lo/474x/1a/cd/ee/1acdeec352e027b19b1a1ec0e1c3e038.jpg",
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            width: 60,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(u.phone),
+                                                Text(u.name),
+                                                Row(children: [
+                                                  Icon(Icons.location_pin,
+                                                      color: Color.fromARGB(
+                                                          255, 36, 96, 200),
+                                                      size: 20),
+                                                  Text(u.address)
+                                                ])
+                                              ],
+                                            ),
+                                          ),
+                                          FilledButton(
+                                            onPressed: () async {
                                               setState(() async {
                                                 receiver.text = u.phone;
                                                 phone = u.phone;
+                                                latLng = LatLng(
+                                                    u.location.latitude,
+                                                    u.location.longitude);
                                                 await queryDatafillter();
                                                 users = [];
                                               });
                                             },
-                                            child: Text("เลือก"))
-                                      ],
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  WidgetStateProperty
+                                                      .all<Color>(Colors
+                                                          .blue), // กำหนดสีฟ้า
+                                            ),
+                                            child: Text("เลือก",
+                                                style: TextStyle(
+                                                    color: Colors
+                                                        .white)), // กำหนดข้อความเป็นสีขาว
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                  )
-                                ],
+                                  ],
+                                ),
                               );
                             }).toList(),
                           )
@@ -219,12 +259,13 @@ class _SenderPageState extends State<SenderPage> {
       TaskSnapshot taskSnapshot = await uploadTask;
       String downloadURL = await taskSnapshot.ref.getDownloadURL();
 
-      await db.collection('send').doc(des.text).set({
+      await db.collection('send').doc().set({
         'receiver': phone,
         'description': des.text,
         'image': downloadURL,
-        'location':
+        'senderlocation':
             GeoPoint(currentLocation.latitude, currentLocation.longitude),
+        'receiverlocation': GeoPoint(latLng.latitude, latLng.longitude),
       });
 
       Get.snackbar('Success', 'Image uploaded and data saved');

@@ -24,7 +24,7 @@ class _HomeriderState extends State<Homerider> {
     super.initState();
     user = context.read<AppData>().user;
     loadData = loadDataAsync();
-    log("message: ${user.name}");
+    log("aaa : ${user.name}");
   }
 
   @override
@@ -103,7 +103,7 @@ class _HomeriderState extends State<Homerider> {
               Padding(
                 padding: const EdgeInsets.only(left: 8, bottom: 3),
                 child: Text(
-                  user.name ?? 'User',
+                  user.name,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -161,35 +161,36 @@ class _HomeriderState extends State<Homerider> {
     );
   }
 
- Future<QuerySnapshot> loadDataAsync() async {
-  try {
-    CollectionReference collectionRef =
-        FirebaseFirestore.instance.collection('send');
-    QuerySnapshot querySnapshot = await collectionRef.get();
-    
-    log("Number of documents: ${querySnapshot.docs.length}");
-    
-    for (var doc in querySnapshot.docs) {
-      log("Document ID: ${doc.id}");
-      log("Document data: ${doc.data()}");
-      
-      // If you want to see specific fields:
-      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+  Future<QuerySnapshot> loadDataAsync() async {
+    try {
+      CollectionReference collectionRef =
+          FirebaseFirestore.instance.collection('send');
+      QuerySnapshot querySnapshot = await collectionRef.get();
+
+      log("Number of documents: ${querySnapshot.docs.length}");
+
+      for (var doc in querySnapshot.docs) {
+        log("Document ID: ${doc.id}");
+        log("Document data: ${doc.data()}");
+
+        // If you want to see specific fields:
+        // Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      }
+
+      return querySnapshot;
+    } catch (err) {
+      log("Error in loadDataAsync: $err");
+      rethrow;
     }
-    
-    return querySnapshot;
-  } catch (err) {
-    log("Error in loadDataAsync: $err");
-    rethrow;
   }
-}
 }
 
 class DeliveryItemWidget extends StatelessWidget {
   final String origin;
   final String location;
-  final String doc;  
-  DeliveryItemWidget({required this.origin, required this.location, required this.doc});
+  final String doc;
+  DeliveryItemWidget(
+      {required this.origin, required this.location, required this.doc});
 
   @override
   Widget build(BuildContext context) {
@@ -242,22 +243,33 @@ class DeliveryItemWidget extends StatelessWidget {
                     children: [
                       const Icon(Icons.location_on, color: Colors.blue),
                       const SizedBox(width: 8),
-                      Text(location, style: const TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
+                      Text(location,
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ],
               ),
               ElevatedButton(
-                onPressed: ()async {
-                  var db = FirebaseFirestore.instance;
+                onPressed: () async {
                   var data = {
-                  'status': 1,
-                };
-      log(data.toString());
+                    'status': 1,
+                  };
+                  log(data.toString());
 
-      await db.collection('user').doc().set(data);
-                  Get.to(Riderstatus());
-
+                  try {
+                    await FirebaseFirestore.instance
+                        .collection('status')
+                        .doc('090')
+                        .update({
+                      'riderPhone': '0999',
+                      'status': 1,
+                    });
+                    log('Document updated successfully');
+                  } catch (e) {
+                    log('Error updating document: $e');
+                  }
+                  Get.to(const Riderstatus());
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 56, 104, 248),
@@ -271,8 +283,10 @@ class DeliveryItemWidget extends StatelessWidget {
                 ),
                 child: const Text(
                   'รับงาน',
-                  style:
-                      TextStyle(fontSize: 20,fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
               ),
             ],
