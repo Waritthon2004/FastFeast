@@ -103,7 +103,7 @@ class _HomeriderState extends State<Homerider> {
               Padding(
                 padding: const EdgeInsets.only(left: 8, bottom: 3),
                 child: Text(
-                  user.name ?? 'User',
+                  user.name,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -174,7 +174,7 @@ class _HomeriderState extends State<Homerider> {
         log("Document data: ${doc.data()}");
 
         // If you want to see specific fields:
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        // Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
       }
 
       return querySnapshot;
@@ -252,14 +252,24 @@ class DeliveryItemWidget extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  var db = FirebaseFirestore.instance;
                   var data = {
                     'status': 1,
                   };
                   log(data.toString());
 
-                  await db.collection('user').doc().set(data);
-                  Get.to(Riderstatus());
+                  try {
+                    await FirebaseFirestore.instance
+                        .collection('status')
+                        .doc('090')
+                        .update({
+                      'riderPhone': '0999',
+                      'status': 1,
+                    });
+                    log('Document updated successfully');
+                  } catch (e) {
+                    log('Error updating document: $e');
+                  }
+                  Get.to(const Riderstatus());
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 56, 104, 248),

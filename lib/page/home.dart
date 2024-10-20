@@ -2,8 +2,10 @@ import 'dart:developer';
 
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
+import 'package:fast_feast/page/sender.dart';
 import 'package:fast_feast/shared/appData.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -110,35 +112,40 @@ Widget body() {
     padding: const EdgeInsets.only(top: 20),
     child: Column(
       children: [
-        Container(
-          width: 300,
-          height: 100,
-          child: Card(
-            color: Colors.white,
-            elevation: 8,
-            child: Center(
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20),
-                    child: Image.asset(
-                      "assets/image/buy.png",
-                      width: 80,
-                      height: 80,
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 40),
-                    child: Text(
-                      "ส่งสินค้า",
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  )
-                ],
+       GestureDetector(
+  onTap: () {
+    Get.to(const SenderPage());
+  },
+  child: SizedBox(
+    width: 300,
+    height: 100,
+    child: Card(
+      color: Colors.white,
+      elevation: 8,
+      child: Center(
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 20),
+              child: Image.asset(
+                "assets/image/buy.png",
+                width: 80,
+                height: 80,
               ),
             ),
-          ),
+            const Padding(
+              padding: EdgeInsets.only(left: 40),
+              child: Text(
+                "ส่งสินค้า",
+                style: TextStyle(fontSize: 20),
+              ),
+            )
+          ],
         ),
+      ),
+    ),
+  ),
+),
         Container(
           width: 300,
           height: 100,

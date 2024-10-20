@@ -1,4 +1,7 @@
+import 'package:fast_feast/page/homeRider.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class BarRider extends StatelessWidget {
   const BarRider({super.key});
@@ -24,6 +27,21 @@ class BarRider extends StatelessWidget {
       selectedItemColor: const Color(0xFF5D939F),
       unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
+      onTap: _onItemTapped,
     );
+  }
+   void _onItemTapped(int index) {
+ 
+    switch (index) {
+      case 0:
+        Get.to(const Homerider());
+        break;
+      case 1:
+        break;
+      case 2:
+      
+        break;
+     
+    }
   }
 }
