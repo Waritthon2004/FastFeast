@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,12 @@ class ProcessSendPage extends StatefulWidget {
 }
 
 class _ProcessSendPageState extends State<ProcessSendPage> {
+  FirebaseFirestore db = FirebaseFirestore.instance;
   @override
+  void initState() {
+    super.initState();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -41,6 +47,17 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
       bottomNavigationBar: const Bar(),
     );
   }
+
+  // void data() async {
+  //   var inboxRef = db.collection("user");
+
+  //   // ค้นหาชื่อที่มีส่วนคล้ายกันโดยเริ่มต้นด้วยค่าที่กรอก
+  //   var query = inboxRef
+  //       .where("phone", isGreaterThanOrEqualTo: receiver.text)
+  //       .where("phone", isLessThan: receiver.text + 'z');
+
+  //   var result = await query.get();
+  // }
 }
 
 Widget content() {

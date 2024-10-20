@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/model/user.dart';
+import 'package:fast_feast/shared/appData.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
@@ -12,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path/path.dart' show basename;
+import 'package:provider/provider.dart';
 
 class SenderPage extends StatefulWidget {
   const SenderPage({Key? key}) : super(key: key);
@@ -26,13 +28,19 @@ class _SenderPageState extends State<SenderPage> {
   final TextEditingController des = TextEditingController();
   final TextEditingController receiver = TextEditingController();
   final MapController mapController = MapController();
-  final FirebaseFirestore db = FirebaseFirestore.instance;
+  FirebaseFirestore db = FirebaseFirestore.instance;
   String phone = "";
   LatLng currentLocation = const LatLng(16.246825669508297, 103.25199289277295);
   late LatLng latLng;
   List<User> users = [];
   String stay = "Mahasarakham University";
   @override
+  late UserInfo user;
+  void initState() {
+    super.initState();
+    user = context.read<AppData>().user;
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -268,6 +276,17 @@ class _SenderPageState extends State<SenderPage> {
         'receiverlocation': GeoPoint(latLng.latitude, latLng.longitude),
       });
 
+      await db.collection('status').doc().set({
+        'receiver': phone,
+        'description': des.text,
+        'image': downloadURL,
+        'senderlocation':
+            GeoPoint(currentLocation.latitude, currentLocation.longitude),
+        'receiverlocation': GeoPoint(latLng.latitude, latLng.longitude),
+        'sender': user.phone,
+        'status': 0
+      });
+
       Get.snackbar('Success', 'Image uploaded and data saved');
       clearFields();
     } catch (error) {
@@ -419,7 +438,7 @@ class _SenderPageState extends State<SenderPage> {
   Future<void> queryData() async {
     try {
       var inboxRef = db.collection("user");
-      var query = inboxRef.where("name", isNotEqualTo: "Ruj");
+      var query = inboxRef.where("name", isNotEqualTo: user.name);
 
       var result = await query.get();
 
