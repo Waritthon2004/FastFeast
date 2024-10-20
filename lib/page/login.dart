@@ -122,7 +122,7 @@ class _LoginState extends State<Login> {
        info.image = querySnapshot.docs[0]['url'];
        info.name = querySnapshot.docs[0]['name'];
        info.phone = querySnapshot.docs[0]['phone'];
-    
+      log(info.name);
       if(querySnapshot.docs[0]['type'] == 1){
        
          Get.to(const HomePage());

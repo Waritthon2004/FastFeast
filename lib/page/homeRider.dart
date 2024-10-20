@@ -24,6 +24,7 @@ class _HomeriderState extends State<Homerider> {
     super.initState();
     user = context.read<AppData>().user;
     loadData = loadDataAsync();
+    log("message: ${user.name}");
   }
 
   @override
