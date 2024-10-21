@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
+
 class Homerider extends StatefulWidget {
   const Homerider({Key? key}) : super(key: key);
 
@@ -24,6 +25,7 @@ class _HomeriderState extends State<Homerider> {
   void initState() {
     super.initState();
     user = context.read<AppData>().user;
+    log("myname:$user.name");
     loadData = loadDataAsync();
   }
 
@@ -148,11 +150,11 @@ class _HomeriderState extends State<Homerider> {
                 itemBuilder: (context, index) {
                   var doc = snapshot.data!.docs[index];
                   return DeliveryItemWidget(
-                    origin: doc['origin'],
-                    location: doc['destination'],
-                    doc: doc.id,
-                    chk:user.docStatus
-                  );
+                      origin: doc['origin'],
+                      location: doc['destination'],
+                      doc: doc.id,
+                      chk: user.docStatus,
+                      phone: user.phone);
                 },
               );
             },
@@ -162,7 +164,6 @@ class _HomeriderState extends State<Homerider> {
     );
   }
 
-
   Future<QuerySnapshot> loadDataAsync() async {
     try {
       Query<Map<String, dynamic>> collectionRef = FirebaseFirestore.instance
@@ -171,15 +172,15 @@ class _HomeriderState extends State<Homerider> {
 
       QuerySnapshot querySnapshot = await collectionRef.get();
 
-      log("Number of documents: ${querySnapshot.docs.length}");
+      // log("Number of documents: ${querySnapshot.docs.length}");
 
-      for (var doc in querySnapshot.docs) {
-        log("Document ID: ${doc.id}");
-        log("Document data: ${doc.data()}");
+      // for (var doc in querySnapshot.docs) {
+      //   log("Document ID: ${doc.id}");
+      //   log("Document data: ${doc.data()}");
 
-        // If you want to see specific fields:
-        // Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-      }
+      //   // If you want to see specific fields:
+      //   // Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      // }
 
       return querySnapshot;
     } catch (err) {
@@ -194,8 +195,15 @@ class DeliveryItemWidget extends StatelessWidget {
   final String location;
   final String doc;
   String chk;
-  DeliveryItemWidget(
-      {super.key, required this.origin, required this.location, required this.doc, required this.chk,});
+  String phone;
+  DeliveryItemWidget({
+    super.key,
+    required this.origin,
+    required this.location,
+    required this.doc,
+    required this.chk,
+    required this.phone,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -244,7 +252,6 @@ class DeliveryItemWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 3),
-                  
                   Row(
                     children: [
                       const Icon(Icons.location_on, color: Colors.blue),
@@ -258,22 +265,33 @@ class DeliveryItemWidget extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  // if(chk==""){
-                  //   log(chk); 
-                  //    Get.snackbar('ผิดพลาด', 'คุณมีสินค้าต้องส่งอยู่เเล้ว',
-                  //   snackPosition: SnackPosition.TOP);
-                  //   return; 
-                  // }
-                     Position position = await _determinePosition();
-                    LatLng currentLocation = LatLng(position.latitude, position.longitude);
+                  try {
+                    QuerySnapshot querySnapshot = await FirebaseFirestore
+                        .instance
+                        .collection('status')
+                        .where('rider', isEqualTo: phone)
+                        .get();
+
+                    if (querySnapshot.docs.isNotEmpty) {
+                      Get.snackbar('ผิดพลาด', 'คุณมีสินค้าต้องส่งอยู่เเล้ว',
+                          snackPosition: SnackPosition.TOP);
+                          return;
+                    }
+                  } catch (e) {
+                    print('Error querying Firestore: $e');
+                  }
+                  Position position = await _determinePosition();
+                  LatLng currentLocation =
+                      LatLng(position.latitude, position.longitude);
                   try {
                     await FirebaseFirestore.instance
                         .collection('status')
                         .doc(doc)
                         .update({
                       'status': 1,
-                      'RiderLocation':GeoPoint(currentLocation.latitude, currentLocation.longitude)
-
+                      'rider': phone,
+                      'RiderLocation': GeoPoint(
+                          currentLocation.latitude, currentLocation.longitude)
                     });
                     log('Document updated successfully');
                     UserInfo info = UserInfo();
@@ -308,31 +326,32 @@ class DeliveryItemWidget extends StatelessWidget {
       ),
     );
   }
+
   Future<Position> _determinePosition() async {
-  bool serviceEnabled;
-  LocationPermission permission;
+    bool serviceEnabled;
+    LocationPermission permission;
 
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    return Future.error('Location services are disabled.');
-  }
-
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      return Future.error('Location permissions are denied');
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
     }
-  }
 
-  if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever, handle appropriately.
-    return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.');
-  }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
 
-  // When we reach here, permissions are granted and we can
-  // continue accessing the position of the device.
-  return await Geolocator.getCurrentPosition();
-}
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
+  }
 }
