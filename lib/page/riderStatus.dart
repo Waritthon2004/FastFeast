@@ -1,22 +1,19 @@
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/barRider.dart';
 import 'package:fast_feast/page/drawer.dart';
-import 'package:fast_feast/page/login.dart';
+import 'package:fast_feast/shared/appData.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
 // ignore: depend_on_referenced_packages
-import 'package:path/path.dart';
+// import 'package:path/path.dart';
+import 'package:provider/provider.dart';
 
 class Riderstatus extends StatefulWidget {
   const Riderstatus({super.key});
@@ -26,17 +23,26 @@ class Riderstatus extends StatefulWidget {
 }
 
 class _RiderstatusState extends State<Riderstatus> {
+  @override
+  late UserInfo user;
+  void initState() {
+    super.initState();
+    user = context
+        .read<AppData>()
+        .user; // Or use watch if you need it to listen for changes
+    loadDataAsync();
+  }
+
   final MapController mapController = MapController();
-  TextEditingController receiver = TextEditingController();
-  TextEditingController des = TextEditingController();
   int status = 0;
-  var data;
   XFile? image;
+   String? origin='';
+   String? destination='';
   @override
   LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
-  @override
   var db = FirebaseFirestore.instance;
-
+  late Future<QuerySnapshot> loadData;
+  // var data = [];
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -45,7 +51,42 @@ class _RiderstatusState extends State<Riderstatus> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            header(context),
+             Container(
+    decoration: const BoxDecoration(
+      color: Color(0xFF1ABBE0),
+      borderRadius: BorderRadius.only(
+        bottomLeft: Radius.circular(20), // Bottom-left corner radius
+        bottomRight: Radius.circular(20), // Bottom-right corner radius
+      ),
+    ),
+    width: MediaQuery.of(context).size.width,
+    height: 120,
+    child:  Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 10),
+            child: Text("ข้อมูลการจัดส่ง",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25,
+                    color: Colors.white)),
+          ),
+          CustomStatusBar(
+            icons: [
+              Icons.hourglass_empty,
+              Icons.phone_android,
+              Icons.motorcycle,
+              Icons.check_circle,
+            ],
+            currentStep: status,
+          ),
+        ],
+      ),
+    ),
+  ),
             const SizedBox(
               height: 20,
             ),
@@ -111,15 +152,12 @@ class _RiderstatusState extends State<Riderstatus> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Row(
+                            Row(
                               children: [
-                                Icon(Icons.local_shipping,
+                                const Icon(Icons.local_shipping,
                                     color: Colors.orange),
-                                SizedBox(width: 8),
-                                Text(
-                                  "ตลาดน้อย",
-                                  style: TextStyle(
-                                      fontSize: 24,
+                                const SizedBox(width: 8),
+                                Text( origin!,style: const TextStyle(fontSize: 24,
                                       fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -136,12 +174,12 @@ class _RiderstatusState extends State<Riderstatus> {
                               ),
                             ),
                             const SizedBox(height: 3),
-                            const Row(
+                             Row(
                               children: [
-                                Icon(Icons.location_on, color: Colors.blue),
-                                SizedBox(width: 8),
-                                Text("ตึก IT",
-                                    style: TextStyle(
+                                const Icon(Icons.location_on, color: Colors.blue),
+                                const SizedBox(width: 8),
+                                Text(destination!,
+                                    style: const TextStyle(
                                         fontSize: 24,
                                         fontWeight: FontWeight.bold)),
                               ],
@@ -174,7 +212,8 @@ class _RiderstatusState extends State<Riderstatus> {
                   ),
                 ),
               ),
-            )
+            ),
+            // TextButton(onPressed: loadDataAsync, child: const Text("xx"))
           ],
         ),
       ),
@@ -196,99 +235,74 @@ class _RiderstatusState extends State<Riderstatus> {
   }
 
   void save() async {
-  var position = await _determinePosition();
-  log("${position.latitude} and ${position.longitude}");
-  latLng = LatLng(position.latitude, position.longitude);
-  mapController.move(latLng, mapController.camera.zoom);
-  setState(() {});
+   Position position = await _determinePosition();
+    
+    LatLng currentLocation = LatLng(position.latitude, position.longitude);
+    mapController.move(latLng, mapController.camera.zoom);
+    setState(() {});
 
-  if (image != null) {
-    File file = File(image!.path);
-    String fileName = basename(file.path);
-    log('File name: $fileName');
+    if (image != null) {
+      File file = File(image!.path);
+      String fileName = (file.path);
+      log('File name: $fileName');
 
-    Reference firebaseStorageRef =
-        FirebaseStorage.instance.ref().child('uploads/$fileName');
+      Reference firebaseStorageRef =
+          FirebaseStorage.instance.ref().child('uploads/$fileName');
 
-    UploadTask uploadTask = firebaseStorageRef.putFile(file);
+      UploadTask uploadTask = firebaseStorageRef.putFile(file);
 
-    uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-      log('Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100} %');
-    });
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        log('Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100} %');
+      });
 
-    await uploadTask.whenComplete(() async {
-      try {
-        String downloadURL = await firebaseStorageRef.getDownloadURL();
-        log('Download URL: $downloadURL');
+      await uploadTask.whenComplete(() async {
+        try {
+          String downloadURL = await firebaseStorageRef.getDownloadURL();
+          log('Download URL: $downloadURL');
 
-        var data = {
-          'status': 1,
-          'image': downloadURL,
-          'location': {
-            'latitude': position.latitude,
-            'longitude': position.longitude,
-          },
-        };
-
-        db.collection('status').doc("2").set(data);
-      } catch (error) {
-        log('Error getting download URL: $error');
-      }
-    }).catchError((error) {
-      log('Upload error: $error');
-    });
-    updateStatus();
-  } else {
-    log("No image selected.");
+          var data = {
+            'status': status+1,
+            'image': downloadURL,
+            'RiderLocation':GeoPoint(currentLocation.latitude, currentLocation.longitude)
+          };
+          await FirebaseFirestore.instance
+              .collection('status')
+              .doc(user.docStatus)
+              .update(data);
+        } catch (error) {
+          log('Error getting download URL: $error');
+        }
+        
+        setState(() {
+          status = status+1;
+        });
+      }).catchError((error) {
+        log('Upload error: $error');
+      });
+    } else {
+      log("No image selected.");
+    }
   }
-}
 
-  void updateStatus() {
+ void loadDataAsync() async {
+  try {
+    final docSnapshot = await FirebaseFirestore.instance
+        .collection('status')
+        .doc(user.docStatus)
+        .get();
     setState(() {
-      status = status + 1;
+      origin = docSnapshot['origin'] as String?;
+      destination =  docSnapshot['destination'] as String?;
+      status = docSnapshot['status'];
+      // You can also store other fields you need
     });
+    
+    log("Origin: $status");
+  } catch (err) {
+    log("Error in loadDataAsync: $err");
   }
 }
-
-Widget header(BuildContext context) {
-  return Container(
-    decoration: const BoxDecoration(
-      color: Color(0xFF1ABBE0),
-      borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(20), // Bottom-left corner radius
-        bottomRight: Radius.circular(20), // Bottom-right corner radius
-      ),
-    ),
-    width: MediaQuery.of(context).size.width,
-    height: 120,
-    child: const Padding(
-      padding: EdgeInsets.only(bottom: 20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(bottom: 10),
-            child: Text("ข้อมูลการจัดส่ง",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25,
-                    color: Colors.white)),
-          ),
-          CustomStatusBar(
-            icons: [
-              Icons.hourglass_empty,
-              Icons.phone_android,
-              Icons.motorcycle,
-              Icons.check_circle,
-            ],
-            currentStep: 1,
-          ),
-        ],
-      ),
-    ),
-  );
 }
-
 Future<Position> _determinePosition() async {
   bool serviceEnabled;
   LocationPermission permission;

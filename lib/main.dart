@@ -14,10 +14,14 @@ void main() async {
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
   );
-   runApp(MultiProvider(
-    providers: [ChangeNotifierProvider(create: (context) => AppData())],
-    child: const MyApp(),
-  ));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppData()), // Add your provider here
+      ],
+      child: const MyApp(), // Your main app widget
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

@@ -4,8 +4,10 @@ import 'package:fast_feast/page/process_send.dart';
 import 'package:fast_feast/page/riderStatus.dart';
 import 'package:fast_feast/page/sender.dart';
 import 'package:fast_feast/page/status.dart';
+import 'package:fast_feast/shared/appData.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 class link extends StatefulWidget {
   const link({super.key});
@@ -15,6 +17,14 @@ class link extends StatefulWidget {
 }
 
 class _linkState extends State<link> {
+  late UserInfo user;
+   @override
+  void initState() {
+    super.initState();
+    user = context.read<AppData>().user;
+    // loadData = loadDataAsync();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

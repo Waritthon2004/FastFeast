@@ -6,8 +6,9 @@ import 'package:fast_feast/page/riderStatus.dart';
 import 'package:fast_feast/shared/appData.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-
+import 'package:geolocator/geolocator.dart';
 class Homerider extends StatefulWidget {
   const Homerider({Key? key}) : super(key: key);
 
@@ -24,7 +25,6 @@ class _HomeriderState extends State<Homerider> {
     super.initState();
     user = context.read<AppData>().user;
     loadData = loadDataAsync();
-    log("aaa : ${user.name}");
   }
 
   @override
@@ -151,6 +151,7 @@ class _HomeriderState extends State<Homerider> {
                     origin: doc['origin'],
                     location: doc['destination'],
                     doc: doc.id,
+                    chk:user.docStatus
                   );
                 },
               );
@@ -161,10 +162,13 @@ class _HomeriderState extends State<Homerider> {
     );
   }
 
+
   Future<QuerySnapshot> loadDataAsync() async {
     try {
-      CollectionReference collectionRef =
-          FirebaseFirestore.instance.collection('send');
+      Query<Map<String, dynamic>> collectionRef = FirebaseFirestore.instance
+          .collection('status')
+          .where('status', isEqualTo: 0);
+
       QuerySnapshot querySnapshot = await collectionRef.get();
 
       log("Number of documents: ${querySnapshot.docs.length}");
@@ -189,8 +193,9 @@ class DeliveryItemWidget extends StatelessWidget {
   final String origin;
   final String location;
   final String doc;
+  String chk;
   DeliveryItemWidget(
-      {required this.origin, required this.location, required this.doc});
+      {super.key, required this.origin, required this.location, required this.doc, required this.chk,});
 
   @override
   Widget build(BuildContext context) {
@@ -239,6 +244,7 @@ class DeliveryItemWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 3),
+                  
                   Row(
                     children: [
                       const Icon(Icons.location_on, color: Colors.blue),
@@ -252,20 +258,27 @@ class DeliveryItemWidget extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  var data = {
-                    'status': 1,
-                  };
-                  log(data.toString());
-
+                  // if(chk==""){
+                  //   log(chk); 
+                  //    Get.snackbar('ผิดพลาด', 'คุณมีสินค้าต้องส่งอยู่เเล้ว',
+                  //   snackPosition: SnackPosition.TOP);
+                  //   return; 
+                  // }
+                     Position position = await _determinePosition();
+                    LatLng currentLocation = LatLng(position.latitude, position.longitude);
                   try {
                     await FirebaseFirestore.instance
                         .collection('status')
-                        .doc('090')
+                        .doc(doc)
                         .update({
-                      'riderPhone': '0999',
                       'status': 1,
+                      'RiderLocation':GeoPoint(currentLocation.latitude, currentLocation.longitude)
+
                     });
                     log('Document updated successfully');
+                    UserInfo info = UserInfo();
+                    info.docStatus = doc;
+                    context.read<AppData>().user = info;
                   } catch (e) {
                     log('Error updating document: $e');
                   }
@@ -295,4 +308,31 @@ class DeliveryItemWidget extends StatelessWidget {
       ),
     );
   }
+  Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition();
+}
 }

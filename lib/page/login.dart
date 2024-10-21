@@ -127,8 +127,10 @@ class _LoginState extends State<Login> {
         info.image = querySnapshot.docs[0]['url'];
         info.name = querySnapshot.docs[0]['name'];
         info.phone = querySnapshot.docs[0]['phone'];
+        
         context.read<AppData>().user = info;
         if (querySnapshot.docs[0]['type'] == 1) {
+          log(querySnapshot.docs[0]['address']);
           Get.to(const HomePage());
         } else if (querySnapshot.docs[0]['type'] == 2) {
           Get.to(const Homerider());
