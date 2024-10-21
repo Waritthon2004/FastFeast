@@ -3,11 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/model/status.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
+import 'package:fast_feast/shared/appData.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class StatusPage extends StatefulWidget {
   const StatusPage({super.key});
@@ -24,6 +26,7 @@ class _StatusPageState extends State<StatusPage> {
   void initState() {
     super.initState();
     queryData();
+    realtime();
   }
 
   LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
@@ -64,14 +67,14 @@ class _StatusPageState extends State<StatusPage> {
                 const SizedBox(
                   height: 20,
                 ),
-                const CustomStatusBar(
-                  icons: [
+                CustomStatusBar(
+                  icons: const [
                     Icons.hourglass_empty,
                     Icons.phone_android,
                     Icons.motorcycle,
                     Icons.check_circle,
                   ],
-                  currentStep: 0,
+                  currentStep: u.status,
                 ),
                 const SizedBox(
                   height: 20,
@@ -83,7 +86,7 @@ class _StatusPageState extends State<StatusPage> {
                     mapController: mapController,
                     options: MapOptions(
                       initialCenter: latLng,
-                      initialZoom: 15.0,
+                      initialZoom: 12.0,
                     ),
                     children: [
                       TileLayer(
@@ -102,15 +105,29 @@ class _StatusPageState extends State<StatusPage> {
                             child: const Icon(Icons.location_pin,
                                 color: Colors.red, size: 30),
                           ),
-                          Marker(
-                            point: LatLng(u.senderlocation.latitude,
-                                u.senderlocation.longitude),
-                            width: 10,
-                            height: 10,
-                            child: const Icon(Icons.location_pin,
-                                color: Color.fromARGB(255, 72, 16, 225),
-                                size: 30),
-                          )
+                          (u.status > 0)
+                              ? Marker(
+                                  point: LatLng(u.senderlocation.latitude,
+                                      u.senderlocation.longitude),
+                                  width: 10,
+                                  height: 10,
+                                  child: const Icon(
+                                    Icons.motorcycle_rounded,
+                                    color: Color.fromARGB(255, 72, 16, 225),
+                                    size: 30,
+                                  ),
+                                )
+                              : Marker(
+                                  point: LatLng(u.senderlocation.latitude,
+                                      u.senderlocation.longitude),
+                                  width: 10,
+                                  height: 10,
+                                  child: const Icon(
+                                    Icons.location_pin,
+                                    color: Color.fromARGB(255, 72, 16, 225),
+                                    size: 30,
+                                  ),
+                                )
                         ],
                       ),
                     ],
@@ -174,6 +191,32 @@ class _StatusPageState extends State<StatusPage> {
     } catch (e) {
       log("Error querying data: $e");
     }
+  }
+
+  void realtime() {
+    final docRef = db.collection("status").doc("N6ORY481K8kLO4yftRLO");
+    context.read<AppData>().listener = docRef.snapshots().listen(
+      (event) {
+        var data = event.data();
+        if (data != null) {
+          try {
+            Status statusData = Status.fromJson(data as Map<String, dynamic>);
+            setState(() {
+              status = [statusData];
+            });
+            log('Status updated: $status');
+          } catch (e) {
+            log("Error parsing status data: $e");
+          }
+        } else {
+          setState(() {
+            status = [];
+          });
+          log('No status found.');
+        }
+      },
+      onError: (error) => log("Listen failed: $error"),
+    );
   }
 
   Widget content() {
