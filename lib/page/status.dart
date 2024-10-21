@@ -1,5 +1,7 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fast_feast/model/product.dart';
+import 'package:fast_feast/model/rider.dart';
 import 'package:fast_feast/model/status.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
@@ -21,12 +23,14 @@ class StatusPage extends StatefulWidget {
 class _StatusPageState extends State<StatusPage> {
   MapController mapController = MapController();
   List<Status> status = [];
+  List<Rider> rider = [];
+  List<Product> product = [];
   late UserInfo user;
-  var data;
+
   @override
   void initState() {
     super.initState();
-
+    querySendData();
     queryData();
     realtime();
   }
@@ -47,11 +51,11 @@ class _StatusPageState extends State<StatusPage> {
             Container(
               width: 50,
               height: 50,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
                   image: NetworkImage(
-                    "https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/418475547_3527827574134521_421755393680319339_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEdVbCSMT19XcCJXhl5nM39mQjXit1mkmGZCNeK3WaSYSp5wgXWCPNiHHAh6XVgQnTipxlh1_zNMxK-9zURA1v6&_nc_ohc=J9ZaSFck58oQ7kNvgGn0dVw&_nc_ht=scontent-bkk1-2.xx&_nc_gid=AL4xba1YgAtt9fnC3FLjEND&oh=00_AYDX2uobSD2wOqFC8pWgrhdLz-oJk2xp3FkeCYrrHFq8gA&oe=67158B07",
+                    user.image,
                   ),
                   fit: BoxFit.cover,
                 ),
@@ -100,8 +104,10 @@ class _StatusPageState extends State<StatusPage> {
                       MarkerLayer(
                         markers: [
                           Marker(
-                            point: LatLng(u.receiverlocation!.latitude,
-                                u.receiverlocation!.longitude),
+                            point: LatLng(
+                              u.receiverlocation!.latitude,
+                              u.receiverlocation!.longitude,
+                            ),
                             width: 10,
                             height: 10,
                             child: const Icon(Icons.location_pin,
@@ -109,8 +115,10 @@ class _StatusPageState extends State<StatusPage> {
                           ),
                           (u.status! > 0)
                               ? Marker(
-                                  point: LatLng(u.RiderLocation!.latitude,
-                                      u.RiderLocation!.longitude),
+                                  point: LatLng(
+                                    u.RiderLocation!.latitude,
+                                    u.RiderLocation!.longitude,
+                                  ),
                                   width: 10,
                                   height: 10,
                                   child: const Icon(
@@ -120,8 +128,10 @@ class _StatusPageState extends State<StatusPage> {
                                   ),
                                 )
                               : Marker(
-                                  point: LatLng(u.senderlocation!.latitude,
-                                      u.senderlocation!.longitude),
+                                  point: LatLng(
+                                    u.senderlocation!.latitude,
+                                    u.senderlocation!.longitude,
+                                  ),
                                   width: 10,
                                   height: 10,
                                   child: const Icon(
@@ -145,19 +155,35 @@ class _StatusPageState extends State<StatusPage> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: EdgeInsets.only(top: 10, left: 30),
+                    padding: const EdgeInsets.only(top: 10, left: 30),
                     child: u.status == 0
-                        ? Text("รอไรเดอร์มารับ")
+                        ? const Text("รอไรเดอร์มารับ")
                         : u.status == 1
-                            ? Text("ไรเดอร์มารับสินค้า")
+                            ? const Text("ไรเดอร์มารับสินค้า")
                             : u.status == 3
-                                ? Text("ไรเดอร์กำลังมาส่งของ")
+                                ? const Text("ไรเดอร์กำลังมาส่งของ")
                                 : u.status == 4
-                                    ? Text("ส่งของเสร็จสิ้น")
-                                    : SizedBox(),
+                                    ? const Text("ส่งของเสร็จสิ้น")
+                                    : const SizedBox(),
                   ),
                 ),
-                content2(),
+                if (u.status == 0)
+                  content()
+                else if (rider.isNotEmpty)
+                  content2()
+                else
+                  FutureBuilder(
+                    future: queryUserData(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else {
+                        return content2();
+                      }
+                    },
+                  ),
               ],
             );
           }).toList(),
@@ -171,7 +197,7 @@ class _StatusPageState extends State<StatusPage> {
   Future<void> queryData() async {
     try {
       user = context.read<AppData>().user;
-      log("AAAA" + user.id);
+
       var inboxRef = db.collection("status").doc(user.id);
 
       var result = await inboxRef.get(); // Fetch a single document
@@ -202,31 +228,65 @@ class _StatusPageState extends State<StatusPage> {
 
   Future<void> queryUserData() async {
     try {
-      var inboxRef = db.collection("rider");
-      var query = inboxRef.where("phone", isEqualTo: status[0].rider);
+      var riderRef = db.collection("rider");
+      var query = riderRef.where("phone", isEqualTo: status[0].rider);
 
       var result = await query.get();
 
       if (result.docs.isNotEmpty) {
         setState(() {
-          status = result.docs
+          rider = result.docs
               .map((doc) {
                 try {
-                  return Status.fromJson(doc.data() as Map<String, dynamic>);
+                  return Rider.fromJson(doc.data() as Map<String, dynamic>);
                 } catch (e) {
-                  log("Error parsing user data: $e");
+                  log("Error parsing rider data: $e");
                   return null;
                 }
               })
-              .whereType<Status>()
+              .whereType<Rider>()
               .toList();
         });
-        log('status found: ${status.length}');
+        log('Riders found: ${rider.length}');
       } else {
         setState(() {
-          status = [];
+          rider = [];
         });
-        log('No status found.');
+        log('No riders found.');
+      }
+    } catch (e) {
+      log("Error querying data: $e");
+    }
+  }
+
+  Future<void> querySendData() async {
+    try {
+      var riderRef = db.collection("send");
+      var query =
+          riderRef.where("description", isEqualTo: status[0].description);
+
+      var result = await query.get();
+
+      if (result.docs.isNotEmpty) {
+        setState(() {
+          product = result.docs
+              .map((doc) {
+                try {
+                  return Product.fromJson(doc.data() as Map<String, dynamic>);
+                } catch (e) {
+                  log("Error parsing rider data: $e");
+                  return null;
+                }
+              })
+              .whereType<Product>()
+              .toList();
+        });
+        log('Riders found: ${product.length}');
+      } else {
+        setState(() {
+          product = [];
+        });
+        log('No riders found.');
       }
     } catch (e) {
       log("Error querying data: $e");
@@ -241,6 +301,7 @@ class _StatusPageState extends State<StatusPage> {
         if (data != null) {
           try {
             Status statusData = Status.fromJson(data as Map<String, dynamic>);
+
             setState(() {
               status = [statusData];
             });
@@ -260,127 +321,129 @@ class _StatusPageState extends State<StatusPage> {
   }
 
   Widget content() {
-    return (data != null && data!['image'] != null)
-        ? Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Container(
-              width: 300,
-              height: 300,
-              child: Image.network(data!['image']),
-            ),
-          )
-        : Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Container(
-              width: 300,
-              height: 300,
-              color: Colors.white,
-            ),
-          );
+    return Column(
+      children: product.map((p) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Container(
+            width: 300,
+            height: 300,
+            child: Image.network(
+                p.image), // Assuming r is a map containing 'image'
+          ),
+        );
+      }).toList(),
+    );
   }
 
   Widget content2() {
+    return Column(
+      children: [
+        const Text("ไรเดอร์"),
+        // Iterate over rider list
+        ...rider.map((r) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              width: 400,
+              height: 90,
+              decoration: BoxDecoration(
+                color: Colors.white, // สีพื้นหลัง
+                borderRadius: BorderRadius.circular(15), // ขอบโค้ง
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 60,
+                    child: Image.network(r.images), // Image URL for rider
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("ชื่อไรเดอร์ : ${r.name}"),
+                      Text("หมายเลขโทรศัพท์ : ${r.phone}"),
+                      Text("หมายเลขทะเบียน : ${r.license}"),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+
+        const Text("สินค้า"),
+
+        ...product.map((p) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              width: 400,
+              height: 90,
+              decoration: BoxDecoration(
+                color: Colors.white, // สีพื้นหลัง
+                borderRadius: BorderRadius.circular(15), // ขอบโค้ง
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 60,
+                    child: Image.network(p.image), // Image URL for product
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 50),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("ชื่อสินค้า : ${p.description}"),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+  Widget header(BuildContext context) {
     return Container(
-      child: Column(
-        children: [
-          const Text("ไรเดอร์"),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              width: 400,
-              height: 90,
+      color: const Color(0xFF1ABBE0),
+      width: MediaQuery.of(context).size.width,
+      height: 90,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 300,
+              height: 40,
               decoration: BoxDecoration(
-                color: Colors.white, // สีพื้นหลัง
-                borderRadius: BorderRadius.circular(15), // ขอบโค้ง
+                color: const Color(0xFF5D939F),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 60,
-                    child: Image.network(""),
-                  ),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("ชื่อไรเดอร์ : Rujlnwza "),
-                      Text("หมายเลขโทรศัพท์ : 09971658777 "),
-                      Text("หมายเลขทะเบียน : กก568")
-                    ],
-                  )
-                ],
+              child: const Center(
+                child: Text(
+                  "สถานะการจัดส่ง",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
-          ),
-          const Text("สินค้า"),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              width: 400,
-              height: 90,
-              decoration: BoxDecoration(
-                color: Colors.white, // สีพื้นหลัง
-                borderRadius: BorderRadius.circular(15), // ขอบโค้ง
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 60,
-                    child: Image.network(""),
-                  ),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("ชื่อไรเดอร์ : Rujlnwza "),
-                      Text("หมายเลขโทรศัพท์ : 09971658777 "),
-                      Text("หมายเลขทะเบียน : กก568")
-                    ],
-                  )
-                ],
-              ),
-            ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }
-}
-
-Widget header(BuildContext context) {
-  return Container(
-    color: const Color(0xFF1ABBE0),
-    width: MediaQuery.of(context).size.width,
-    height: 90,
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 300,
-            height: 40,
-            decoration: BoxDecoration(
-              color: const Color(0xFF5D939F),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Center(
-              child: Text(
-                "สถานะการจัดส่ง",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
 }
 
 class CustomStatusBar extends StatelessWidget {

@@ -55,7 +55,7 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
                           onPressed: () {
                             log("do mod");
                           },
-                          child: Text("ดูทั้งหมด")),
+                          child: Text("ดูรายละเอียดทั้งหมด")),
                     )
                   ],
                 ),
@@ -94,8 +94,7 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.network(
-                      "https://i.pinimg.com/enabled_lo/564x/7a/c8/30/7ac8304987fd3eb12b13ac28b9e06f02.jpg"),
+                  Image.network(u.image!),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
