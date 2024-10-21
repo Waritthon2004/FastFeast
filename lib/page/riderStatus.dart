@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/barRider.dart';
 import 'package:fast_feast/page/drawer.dart';
+import 'package:fast_feast/page/login.dart';
 import 'package:fast_feast/shared/appData.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -40,9 +41,9 @@ class _RiderstatusState extends State<Riderstatus> {
    String? destination='';
   @override
   LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
+  @override
   var db = FirebaseFirestore.instance;
-  late Future<QuerySnapshot> loadData;
-  // var data = [];
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -235,16 +236,16 @@ class _RiderstatusState extends State<Riderstatus> {
   }
 
   void save() async {
-   Position position = await _determinePosition();
-    
-    LatLng currentLocation = LatLng(position.latitude, position.longitude);
-    mapController.move(latLng, mapController.camera.zoom);
-    setState(() {});
+  var position = await _determinePosition();
+  log("${position.latitude} and ${position.longitude}");
+  latLng = LatLng(position.latitude, position.longitude);
+  mapController.move(latLng, mapController.camera.zoom);
+  setState(() {});
 
-    if (image != null) {
-      File file = File(image!.path);
-      String fileName = (file.path);
-      log('File name: $fileName');
+  if (image != null) {
+    File file = File(image!.path);
+    String fileName = basename(file.path);
+    log('File name: $fileName');
 
       Reference firebaseStorageRef =
           FirebaseStorage.instance.ref().child('uploads/$fileName');
