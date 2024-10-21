@@ -37,8 +37,8 @@ class _RiderstatusState extends State<Riderstatus> {
   final MapController mapController = MapController();
   int status = 0;
   XFile? image;
-   String? origin='';
-   String? destination='';
+  String? origin = '';
+  String? destination = '';
   @override
   LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
   @override
@@ -52,42 +52,43 @@ class _RiderstatusState extends State<Riderstatus> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-             Container(
-    decoration: const BoxDecoration(
-      color: Color(0xFF1ABBE0),
-      borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(20), // Bottom-left corner radius
-        bottomRight: Radius.circular(20), // Bottom-right corner radius
-      ),
-    ),
-    width: MediaQuery.of(context).size.width,
-    height: 120,
-    child:  Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 10),
-            child: Text("ข้อมูลการจัดส่ง",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25,
-                    color: Colors.white)),
-          ),
-          CustomStatusBar(
-            icons: [
-              Icons.hourglass_empty,
-              Icons.phone_android,
-              Icons.motorcycle,
-              Icons.check_circle,
-            ],
-            currentStep: status,
-          ),
-        ],
-      ),
-    ),
-  ),
+            Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFF1ABBE0),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20), // Bottom-left corner radius
+                  bottomRight:
+                      Radius.circular(20), // Bottom-right corner radius
+                ),
+              ),
+              width: MediaQuery.of(context).size.width,
+              height: 120,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 10),
+                      child: Text("ข้อมูลการจัดส่ง",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25,
+                              color: Colors.white)),
+                    ),
+                    CustomStatusBar(
+                      icons: [
+                        Icons.hourglass_empty,
+                        Icons.phone_android,
+                        Icons.motorcycle,
+                        Icons.check_circle,
+                      ],
+                      currentStep: status,
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(
               height: 20,
             ),
@@ -101,7 +102,7 @@ class _RiderstatusState extends State<Riderstatus> {
                 mapController: mapController,
                 options: MapOptions(
                   initialCenter: latLng,
-                  initialZoom: 15.0,
+                  initialZoom: 12.0,
                 ),
                 children: [
                   TileLayer(
@@ -112,14 +113,35 @@ class _RiderstatusState extends State<Riderstatus> {
                   ),
                   MarkerLayer(
                     markers: [
-                      Marker(
-                        point: latLng,
+                      const Marker(
+                        point: LatLng(16.246825669508297, 103.25199289277295),
                         width: 10,
                         height: 10,
-                        child: Container(
-                          color: Colors.red,
-                        ),
+                        child: Icon(Icons.location_pin,
+                            color: Colors.red, size: 30),
                       ),
+                      (status > 1)
+                          ? const Marker(
+                              point: LatLng(16.246825669508297, 103.9289277295),
+                              width: 10,
+                              height: 10,
+                              child: Icon(
+                                Icons.motorcycle_rounded,
+                                color: Color.fromARGB(255, 72, 16, 225),
+                                size: 30,
+                              ),
+                            )
+                          : const Marker(
+                              point: LatLng(
+                                  16.946825669508297, 103.25199289277295),
+                              width: 10,
+                              height: 10,
+                              child: Icon(
+                                Icons.location_pin,
+                                color: Color.fromARGB(255, 72, 16, 225),
+                                size: 30,
+                              ),
+                            )
                     ],
                   ),
                 ],
@@ -158,7 +180,10 @@ class _RiderstatusState extends State<Riderstatus> {
                                 const Icon(Icons.local_shipping,
                                     color: Colors.orange),
                                 const SizedBox(width: 8),
-                                Text( origin!,style: const TextStyle(fontSize: 24,
+                                Text(
+                                  origin!,
+                                  style: const TextStyle(
+                                      fontSize: 24,
                                       fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -175,9 +200,10 @@ class _RiderstatusState extends State<Riderstatus> {
                               ),
                             ),
                             const SizedBox(height: 3),
-                             Row(
+                            Row(
                               children: [
-                                const Icon(Icons.location_on, color: Colors.blue),
+                                const Icon(Icons.location_on,
+                                    color: Colors.blue),
                                 const SizedBox(width: 8),
                                 Text(destination!,
                                     style: const TextStyle(
@@ -236,20 +262,19 @@ class _RiderstatusState extends State<Riderstatus> {
   }
 
   void save() async {
-  var position = await _determinePosition();
-  log("${position.latitude} and ${position.longitude}");
-  latLng = LatLng(position.latitude, position.longitude);
-  mapController.move(latLng, mapController.camera.zoom);
-  setState(() {});
+    var position = await _determinePosition();
+    LatLng currentLocation = LatLng(position.latitude, position.longitude);
+    log("${position.latitude} and ${position.longitude}");
+    mapController.move(latLng, mapController.camera.zoom);
+    setState(() {});
 
-  if (image != null) {
-    File file = File(image!.path);
-    String fileName = basename(file.path);
-    log('File name: $fileName');
+    if (image != null) {
+      File file = File(image!.path);
+      String fileName = (file.path);
+      log('File name: $fileName');
 
       Reference firebaseStorageRef =
           FirebaseStorage.instance.ref().child('uploads/$fileName');
-
       UploadTask uploadTask = firebaseStorageRef.putFile(file);
 
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
@@ -262,9 +287,10 @@ class _RiderstatusState extends State<Riderstatus> {
           log('Download URL: $downloadURL');
 
           var data = {
-            'status': status+1,
+            'status': status + 1,
             'image': downloadURL,
-            'RiderLocation':GeoPoint(currentLocation.latitude, currentLocation.longitude)
+            'RiderLocation':
+                GeoPoint(currentLocation.latitude, currentLocation.longitude)
           };
           await FirebaseFirestore.instance
               .collection('status')
@@ -273,9 +299,9 @@ class _RiderstatusState extends State<Riderstatus> {
         } catch (error) {
           log('Error getting download URL: $error');
         }
-        
+
         setState(() {
-          status = status+1;
+          status = status + 1;
         });
       }).catchError((error) {
         log('Upload error: $error');
@@ -285,25 +311,26 @@ class _RiderstatusState extends State<Riderstatus> {
     }
   }
 
- void loadDataAsync() async {
-  try {
-    final docSnapshot = await FirebaseFirestore.instance
-        .collection('status')
-        .doc(user.docStatus)
-        .get();
-    setState(() {
-      origin = docSnapshot['origin'] as String?;
-      destination =  docSnapshot['destination'] as String?;
-      status = docSnapshot['status'];
-      // You can also store other fields you need
-    });
-    
-    log("Origin: $status");
-  } catch (err) {
-    log("Error in loadDataAsync: $err");
+  void loadDataAsync() async {
+    try {
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('status')
+          .doc(user.docStatus)
+          .get();
+      setState(() {
+        origin = docSnapshot['origin'] as String?;
+        destination = docSnapshot['destination'] as String?;
+        status = docSnapshot['status'];
+        // You can also store other fields you need
+      });
+
+      log("Origin: $status");
+    } catch (err) {
+      log("Error in loadDataAsync: $err");
+    }
   }
 }
-}
+
 Future<Position> _determinePosition() async {
   bool serviceEnabled;
   LocationPermission permission;

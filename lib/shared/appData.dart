@@ -11,4 +11,7 @@ class UserInfo {
   String name = "";
   String phone = "";
   String image = "";
+  String docStatus = "";
+  String address = "";
+  String id = "";
 }

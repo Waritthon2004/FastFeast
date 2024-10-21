@@ -4,7 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/model/status.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
+import 'package:fast_feast/page/status.dart';
+import 'package:fast_feast/shared/appData.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 class ProcessSendPage extends StatefulWidget {
   const ProcessSendPage({super.key});
@@ -16,9 +20,11 @@ class ProcessSendPage extends StatefulWidget {
 class _ProcessSendPageState extends State<ProcessSendPage> {
   FirebaseFirestore db = FirebaseFirestore.instance;
   List<Status> status = [];
+  late UserInfo user;
   @override
   void initState() {
     super.initState();
+
     queryData();
   }
 
@@ -40,7 +46,18 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
                   borderRadius: BorderRadius.circular(15), // ขอบโค้ง
                 ),
                 child: Column(
-                  children: [const Text("สินค้าไปส่ง"), content()],
+                  children: [
+                    const Text("สินค้าไปส่ง"),
+                    content(),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10, bottom: 10),
+                      child: FilledButton(
+                          onPressed: () {
+                            log("do mod");
+                          },
+                          child: Text("ดูทั้งหมด")),
+                    )
+                  ],
                 ),
               ),
             )
@@ -83,20 +100,25 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(u.description),
-                      Text(u.sender),
+                      Text(u.description!),
+                      Text(u.sender!),
                       Row(
                         children: [
                           const Icon(Icons.location_pin,
                               color: Color.fromARGB(255, 41, 94, 240),
                               size: 30),
-                          Text(u.destination),
+                          Text(u.destination!),
                         ],
                       ),
                     ],
                   ),
-                  const Icon(Icons.search,
-                      color: Color.fromARGB(255, 41, 94, 240), size: 30)
+                  GestureDetector(
+                    onTap: () async {
+                      await docid(u.description!);
+                    },
+                    child: const Icon(Icons.search,
+                        color: Color.fromARGB(255, 41, 94, 240), size: 30),
+                  )
                 ],
               ),
             ),
@@ -108,8 +130,10 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
 
   Future<void> queryData() async {
     try {
+      user = context.read<AppData>().user;
       var inboxRef = db.collection("status");
-      var query = inboxRef.where("status", isNotEqualTo: 4);
+
+      var query = inboxRef.where("receiver", isEqualTo: user.phone);
 
       var result = await query.get();
 
@@ -128,6 +152,43 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
               .toList();
         });
         log('status found: ${status.length}');
+      } else {
+        setState(() {
+          status = [];
+        });
+        log('No status found.');
+      }
+    } catch (e) {
+      log("Error querying data: $e");
+    }
+  }
+
+  Future<void> docid(String x) async {
+    try {
+      var inboxRef = db.collection("status");
+
+      var query = inboxRef.where("description", isEqualTo: x);
+
+      var result = await query.get();
+
+      if (result.docs.isNotEmpty) {
+        setState(() {
+          status = result.docs
+              .map((doc) {
+                try {
+                  user.id = doc.id;
+                  context.read<AppData>().user.id = user.id;
+                  return Status.fromJson(doc.data() as Map<String, dynamic>);
+                } catch (e) {
+                  log("Error parsing user data: $e");
+                  return null;
+                }
+              })
+              .whereType<Status>()
+              .toList();
+        });
+        log('status found: ${status.length}');
+        Get.to(const StatusPage());
       } else {
         setState(() {
           status = [];

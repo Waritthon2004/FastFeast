@@ -21,10 +21,12 @@ class StatusPage extends StatefulWidget {
 class _StatusPageState extends State<StatusPage> {
   MapController mapController = MapController();
   List<Status> status = [];
+  late UserInfo user;
   var data;
   @override
   void initState() {
     super.initState();
+
     queryData();
     realtime();
   }
@@ -74,7 +76,7 @@ class _StatusPageState extends State<StatusPage> {
                     Icons.motorcycle,
                     Icons.check_circle,
                   ],
-                  currentStep: u.status,
+                  currentStep: u.status!,
                 ),
                 const SizedBox(
                   height: 20,
@@ -98,17 +100,17 @@ class _StatusPageState extends State<StatusPage> {
                       MarkerLayer(
                         markers: [
                           Marker(
-                            point: LatLng(u.receiverlocation.latitude,
-                                u.receiverlocation.longitude),
+                            point: LatLng(u.receiverlocation!.latitude,
+                                u.receiverlocation!.longitude),
                             width: 10,
                             height: 10,
                             child: const Icon(Icons.location_pin,
                                 color: Colors.red, size: 30),
                           ),
-                          (u.status > 0)
+                          (u.status! > 0)
                               ? Marker(
-                                  point: LatLng(u.senderlocation.latitude,
-                                      u.senderlocation.longitude),
+                                  point: LatLng(u.RiderLocation!.latitude,
+                                      u.RiderLocation!.longitude),
                                   width: 10,
                                   height: 10,
                                   child: const Icon(
@@ -118,8 +120,8 @@ class _StatusPageState extends State<StatusPage> {
                                   ),
                                 )
                               : Marker(
-                                  point: LatLng(u.senderlocation.latitude,
-                                      u.senderlocation.longitude),
+                                  point: LatLng(u.senderlocation!.latitude,
+                                      u.senderlocation!.longitude),
                                   width: 10,
                                   height: 10,
                                   child: const Icon(
@@ -140,11 +142,19 @@ class _StatusPageState extends State<StatusPage> {
                     child: Text("สถานะการส่งของ"),
                   ),
                 ),
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
                     padding: EdgeInsets.only(top: 10, left: 30),
-                    child: Text("รอไรเดอร์มารับ"),
+                    child: u.status == 0
+                        ? Text("รอไรเดอร์มารับ")
+                        : u.status == 1
+                            ? Text("ไรเดอร์มารับสินค้า")
+                            : u.status == 3
+                                ? Text("ไรเดอร์กำลังมาส่งของ")
+                                : u.status == 4
+                                    ? Text("ส่งของเสร็จสิ้น")
+                                    : SizedBox(),
                   ),
                 ),
                 content2(),
@@ -160,10 +170,40 @@ class _StatusPageState extends State<StatusPage> {
 
   Future<void> queryData() async {
     try {
-      var inboxRef = db.collection("status");
-      var query = inboxRef
-          .where("receiver", isEqualTo: "095")
-          .where("description", isEqualTo: "com");
+      user = context.read<AppData>().user;
+      log("AAAA" + user.id);
+      var inboxRef = db.collection("status").doc(user.id);
+
+      var result = await inboxRef.get(); // Fetch a single document
+
+      if (result.exists) {
+        // Check if the document exists
+        setState(() {
+          try {
+            status = [
+              Status.fromJson(result.data() as Map<String, dynamic>)
+            ]; // Convert to a list
+          } catch (e) {
+            log("Error parsing user data: $e");
+            status = [];
+          }
+        });
+        log('Status found.');
+      } else {
+        setState(() {
+          status = [];
+        });
+        log('No status found.');
+      }
+    } catch (e) {
+      log("Error querying data: $e");
+    }
+  }
+
+  Future<void> queryUserData() async {
+    try {
+      var inboxRef = db.collection("rider");
+      var query = inboxRef.where("phone", isEqualTo: status[0].rider);
 
       var result = await query.get();
 
@@ -194,7 +234,7 @@ class _StatusPageState extends State<StatusPage> {
   }
 
   void realtime() {
-    final docRef = db.collection("status").doc("N6ORY481K8kLO4yftRLO");
+    final docRef = db.collection("status").doc(user.id);
     context.read<AppData>().listener = docRef.snapshots().listen(
       (event) {
         var data = event.data();
@@ -341,47 +381,6 @@ Widget header(BuildContext context) {
       ),
     ),
   );
-}
-
-/// Determine the current position of the device.
-///
-/// When the location services are not enabled or permissions
-/// are denied the `Future` will return an error.
-Future<Position> _determinePosition() async {
-  bool serviceEnabled;
-  LocationPermission permission;
-
-  // Test if location services are enabled.
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    // Location services are not enabled don't continue
-    // accessing the position and request users of the
-    // App to enable the location services.
-    return Future.error('Location services are disabled.');
-  }
-
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      // Permissions are denied, next time you could try
-      // requesting permissions again (this is also where
-      // Android's shouldShowRequestPermissionRationale
-      // returned true. According to Android guidelines
-      // your App should show an explanatory UI now.
-      return Future.error('Location permissions are denied');
-    }
-  }
-
-  if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever, handle appropriately.
-    return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.');
-  }
-
-  // When we reach here, permissions are granted and we can
-  // continue accessing the position of the device.
-  return await Geolocator.getCurrentPosition();
 }
 
 class CustomStatusBar extends StatelessWidget {
