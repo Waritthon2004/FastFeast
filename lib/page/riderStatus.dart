@@ -9,6 +9,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
@@ -35,7 +37,7 @@ class _RiderstatusState extends State<Riderstatus> {
     user = context.read<AppData>().user;
     loadDataAsync();
     realtime();
-    // startLocationUpdates(); // Start updating the location every 3 seconds
+    startLocationUpdates(); // Start updating the location every 3 seconds
   }
 
   final MapController mapController = MapController();
@@ -106,10 +108,10 @@ class _RiderstatusState extends State<Riderstatus> {
               height: 340,
               child: FlutterMap(
                 mapController: mapController,
-                options: const MapOptions(
-                  initialCenter: LatLng(16.246825669508297,
-                      103.25199289277295), // Use a default center for the map
-                  initialZoom: 12.0,
+                options: MapOptions(
+                  initialCenter:
+                      riderLocation, // Use a default center for the map
+                  initialZoom: 1,
                 ),
                 children: [
                   TileLayer(
@@ -191,7 +193,6 @@ class _RiderstatusState extends State<Riderstatus> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 3),
                             Padding(
                               padding: const EdgeInsets.only(left: 10),
                               child: Container(
@@ -202,7 +203,6 @@ class _RiderstatusState extends State<Riderstatus> {
                                 color: Colors.grey, // Line color
                               ),
                             ),
-                            const SizedBox(height: 3),
                             Row(
                               children: [
                                 const Icon(Icons.location_on,
@@ -246,8 +246,9 @@ class _RiderstatusState extends State<Riderstatus> {
             TextButton(
                 onPressed: () {
                   if (locationUpdateTimer != null) {
-                    locationUpdateTimer?.cancel(); // Stops the Timer
-                    log("Location update stopped");
+                    locationUpdateTimer?.cancel();
+                    locationUpdateTimer = null;
+                    log("Location updates stopped");
                   }
                 },
                 child: const Text("xx"))
@@ -268,7 +269,6 @@ class _RiderstatusState extends State<Riderstatus> {
           .listen((DocumentSnapshot snapshot) {
         if (snapshot.exists) {
           Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-
           setState(() {
             lastStatus = data['status'];
             status = data['status'];
@@ -279,10 +279,6 @@ class _RiderstatusState extends State<Riderstatus> {
               List<dynamic> riderList = data['RiderLocation'];
               riderLocation = LatLng(riderList[0], riderList[1]);
             }
-            // Set rider location to sender location for now
-
-            // Update map center and zoom
-            // mapController.move(senderLocation, 15.0);
           });
         }
       });
@@ -296,10 +292,91 @@ class _RiderstatusState extends State<Riderstatus> {
     image = await picker.pickImage(source: ImageSource.camera);
     if (image != null) {
       log('Image selected: ${image!.path}');
-      save();
+      if (status == 2) {
+        CheckConfirm();
+      } else {
+        save();
+      }
       setState(() {});
     } else {
       log('No image selected');
+    }
+  }
+
+  // ignore: non_constant_identifier_names
+  void CheckConfirm() {
+    if (status == 2) {
+      Get.defaultDialog(
+        title: "",
+        content: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Text(
+                "จัดส่งเรียบร้อยเเล้วใช่หรือไม่",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Cancel Button (Gray)
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey, // Background color
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // Rounded corners
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 25, vertical: 13), // Padding
+                    ),
+                    child: const Text(
+                      'ยกเลิก',
+                      style: TextStyle(
+                          color: Colors.white, // Text color
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  const SizedBox(width: 20), // Space between buttons
+
+                  // Yes Button (Green)
+                  ElevatedButton(
+                    onPressed: () {
+                      save();
+                      Get.back();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green, // Background color
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // Rounded corners
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 39, vertical: 13), // Padding
+                    ),
+                    child: const Text(
+                      'ใช่',
+                      style: TextStyle(
+                          color: Colors.white, // Text color
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
     }
   }
 
@@ -314,8 +391,6 @@ class _RiderstatusState extends State<Riderstatus> {
       var position = await _determinePosition();
       LatLng currentLocation = LatLng(position.latitude, position.longitude);
       log("Current location: ${position.latitude}, ${position.longitude}");
-
-      // Update Firestore with the new rider location
       var data = {
         'RiderLocation':
             GeoPoint(currentLocation.latitude, currentLocation.longitude),
@@ -327,7 +402,6 @@ class _RiderstatusState extends State<Riderstatus> {
 
       setState(() {
         riderLocation = currentLocation;
-        // Optionally update the map position
         mapController.move(riderLocation, mapController.camera.zoom);
       });
     });
