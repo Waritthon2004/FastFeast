@@ -97,33 +97,53 @@ class _RiderstatusState extends State<Riderstatus> {
             SizedBox(
               width: 340,
               height: 340,
-              child: FlutterMap(
-                mapController: mapController,
-                options: MapOptions(
-                  initialCenter: latLng,
-                  initialZoom: 15.0,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.example.app',
-                    maxNativeZoom: 19,
-                  ),
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: latLng,
-                        width: 10,
-                        height: 10,
-                        child: Container(
-                          color: Colors.red,
-                        ),
+              child:FlutterMap(
+                    mapController: mapController,
+                    options: MapOptions(
+                      initialCenter: latLng,
+                      initialZoom: 12.0,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.app',
+                        maxNativeZoom: 19,
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          const Marker(
+                            point: LatLng(16.246825669508297, 103.25199289277295),
+                            width: 10,
+                            height: 10,
+                            child: Icon(Icons.location_pin,
+                                color: Colors.red, size: 30),
+                          ),
+                          (status > 1)
+                              ? const Marker(
+                                  point: LatLng(16.246825669508297, 103.9289277295),
+                                  width: 10,
+                                  height: 10,
+                                  child: Icon(
+                                    Icons.motorcycle_rounded,
+                                    color: Color.fromARGB(255, 72, 16, 225),
+                                    size: 30,
+                                  ),
+                                )
+                              : const Marker(
+                                  point: LatLng(16.946825669508297, 103.25199289277295),
+                                  width: 10,
+                                  height: 10,
+                                  child: Icon(
+                                    Icons.location_pin,
+                                    color: Color.fromARGB(255, 72, 16, 225),
+                                    size: 30,
+                                  ),
+                                )
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 10),
@@ -237,19 +257,18 @@ class _RiderstatusState extends State<Riderstatus> {
 
   void save() async {
   var position = await _determinePosition();
+   LatLng currentLocation = LatLng(position.latitude, position.longitude);
   log("${position.latitude} and ${position.longitude}");
-  latLng = LatLng(position.latitude, position.longitude);
   mapController.move(latLng, mapController.camera.zoom);
   setState(() {});
 
   if (image != null) {
     File file = File(image!.path);
-    String fileName = basename(file.path);
+    String fileName = (file.path);
     log('File name: $fileName');
 
       Reference firebaseStorageRef =
-          FirebaseStorage.instance.ref().child('uploads/$fileName');
-
+      FirebaseStorage.instance.ref().child('uploads/$fileName');
       UploadTask uploadTask = firebaseStorageRef.putFile(file);
 
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
