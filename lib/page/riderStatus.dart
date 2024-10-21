@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/barRider.dart';
 import 'package:fast_feast/page/drawer.dart';
-import 'package:fast_feast/page/login.dart';
 import 'package:fast_feast/shared/appData.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -24,26 +24,32 @@ class Riderstatus extends StatefulWidget {
 }
 
 class _RiderstatusState extends State<Riderstatus> {
-  @override
+  Timer? locationUpdateTimer;
+
+  List<GeoPoint> locations = [];
   late UserInfo user;
+  @override
+  @override
   void initState() {
     super.initState();
-    user = context
-        .read<AppData>()
-        .user; // Or use watch if you need it to listen for changes
+    user = context.read<AppData>().user;
     loadDataAsync();
+    realtime();
+    // startLocationUpdates(); // Start updating the location every 3 seconds
   }
 
   final MapController mapController = MapController();
   int status = 0;
   XFile? image;
-   String? origin='';
-   String? destination='';
-  @override
+  String? origin = '';
+  String? destination = '';
   LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
-  @override
   var db = FirebaseFirestore.instance;
-
+  int lastStatus = 0;
+  LatLng riderLocation = const LatLng(0, 0);
+  LatLng receiverLocation = const LatLng(0, 0);
+  LatLng senderLocation = const LatLng(0, 0);
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -52,42 +58,43 @@ class _RiderstatusState extends State<Riderstatus> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-             Container(
-    decoration: const BoxDecoration(
-      color: Color(0xFF1ABBE0),
-      borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(20), // Bottom-left corner radius
-        bottomRight: Radius.circular(20), // Bottom-right corner radius
-      ),
-    ),
-    width: MediaQuery.of(context).size.width,
-    height: 120,
-    child:  Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 10),
-            child: Text("ข้อมูลการจัดส่ง",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25,
-                    color: Colors.white)),
-          ),
-          CustomStatusBar(
-            icons: [
-              Icons.hourglass_empty,
-              Icons.phone_android,
-              Icons.motorcycle,
-              Icons.check_circle,
-            ],
-            currentStep: status,
-          ),
-        ],
-      ),
-    ),
-  ),
+            Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFF1ABBE0),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20), // Bottom-left corner radius
+                  bottomRight:
+                      Radius.circular(20), // Bottom-right corner radius
+                ),
+              ),
+              width: MediaQuery.of(context).size.width,
+              height: 120,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 10),
+                      child: Text("ข้อมูลการจัดส่ง",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25,
+                              color: Colors.white)),
+                    ),
+                    CustomStatusBar(
+                      icons: const [
+                        Icons.hourglass_empty,
+                        Icons.phone_android,
+                        Icons.motorcycle,
+                        Icons.check_circle,
+                      ],
+                      currentStep: status,
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(
               height: 20,
             ),
@@ -97,53 +104,51 @@ class _RiderstatusState extends State<Riderstatus> {
             SizedBox(
               width: 340,
               height: 340,
-              child:FlutterMap(
-                    mapController: mapController,
-                    options: MapOptions(
-                      initialCenter: latLng,
-                      initialZoom: 12.0,
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.example.app',
-                        maxNativeZoom: 19,
+              child: FlutterMap(
+                mapController: mapController,
+                options: const MapOptions(
+                  initialCenter: LatLng(16.246825669508297,
+                      103.25199289277295), // Use a default center for the map
+                  initialZoom: 12.0,
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.example.app',
+                    maxNativeZoom: 19,
+                  ),
+                  MarkerLayer(
+                    markers: [
+                      // 1. Rider location marker
+                      Marker(
+                        point: riderLocation,
+                        width: 30,
+                        height: 30,
+                        child: Icon(Icons.motorcycle_rounded,
+                            color: Color.fromARGB(255, 218, 193, 0), size: 30),
                       ),
-                      MarkerLayer(
-                        markers: [
-                          const Marker(
-                            point: LatLng(16.246825669508297, 103.25199289277295),
-                            width: 10,
-                            height: 10,
-                            child: Icon(Icons.location_pin,
-                                color: Colors.red, size: 30),
-                          ),
-                          (status > 1)
-                              ? const Marker(
-                                  point: LatLng(16.246825669508297, 103.9289277295),
-                                  width: 10,
-                                  height: 10,
-                                  child: Icon(
-                                    Icons.motorcycle_rounded,
-                                    color: Color.fromARGB(255, 72, 16, 225),
-                                    size: 30,
-                                  ),
-                                )
-                              : const Marker(
-                                  point: LatLng(16.946825669508297, 103.25199289277295),
-                                  width: 10,
-                                  height: 10,
-                                  child: Icon(
-                                    Icons.location_pin,
-                                    color: Color.fromARGB(255, 72, 16, 225),
-                                    size: 30,
-                                  ),
-                                )
-                        ],
+                      // 2. Receiver location marker
+                      Marker(
+                        point: receiverLocation,
+                        width: 30,
+                        height: 30,
+                        child: Icon(Icons.location_pin,
+                            color: Color.fromARGB(255, 33, 89, 243), size: 30),
                       ),
+                      // 3. Conditionally add the sender location marker if status > 1
+                      if (status <= 1)
+                        Marker(
+                          point: senderLocation,
+                          width: 30,
+                          height: 30,
+                          child: Icon(Icons.location_pin,
+                              color: Color.fromARGB(255, 206, 7, 4), size: 30),
+                        ),
                     ],
                   ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 10),
@@ -178,7 +183,10 @@ class _RiderstatusState extends State<Riderstatus> {
                                 const Icon(Icons.local_shipping,
                                     color: Colors.orange),
                                 const SizedBox(width: 8),
-                                Text( origin!,style: const TextStyle(fontSize: 24,
+                                Text(
+                                  origin!,
+                                  style: const TextStyle(
+                                      fontSize: 24,
                                       fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -195,9 +203,10 @@ class _RiderstatusState extends State<Riderstatus> {
                               ),
                             ),
                             const SizedBox(height: 3),
-                             Row(
+                            Row(
                               children: [
-                                const Icon(Icons.location_on, color: Colors.blue),
+                                const Icon(Icons.location_on,
+                                    color: Colors.blue),
                                 const SizedBox(width: 8),
                                 Text(destination!,
                                     style: const TextStyle(
@@ -234,13 +243,54 @@ class _RiderstatusState extends State<Riderstatus> {
                 ),
               ),
             ),
-            // TextButton(onPressed: loadDataAsync, child: const Text("xx"))
+            TextButton(
+                onPressed: () {
+                  if (locationUpdateTimer != null) {
+                    locationUpdateTimer?.cancel(); // Stops the Timer
+                    log("Location update stopped");
+                  }
+                },
+                child: const Text("xx"))
           ],
         ),
       ),
       drawer: const MyDrawer(),
       bottomNavigationBar: const BarRider(),
     );
+  }
+
+  void realtime() {
+    try {
+      FirebaseFirestore.instance
+          .collection('status')
+          .doc(user.docStatus)
+          .snapshots()
+          .listen((DocumentSnapshot snapshot) {
+        if (snapshot.exists) {
+          Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+
+
+
+          setState(() {
+            lastStatus = data['status'];
+            status = data['status'];
+            if (data['RiderLocation'] is GeoPoint) {
+              GeoPoint riderGeo = data['RiderLocation'];
+              riderLocation = LatLng(riderGeo.latitude, riderGeo.longitude);
+            } else if (data['RiderLocation'] is List) {
+              List<dynamic> riderList = data['RiderLocation'];
+              riderLocation = LatLng(riderList[0], riderList[1]);
+            }
+            // Set rider location to sender location for now
+
+            // Update map center and zoom
+            // mapController.move(senderLocation, 15.0);
+          });
+        }
+      });
+    } catch (e) {
+      log("Error in realtime(): ${e.toString()}");
+    }
   }
 
   void camera() async {
@@ -255,20 +305,50 @@ class _RiderstatusState extends State<Riderstatus> {
     }
   }
 
-  void save() async {
-  var position = await _determinePosition();
-   LatLng currentLocation = LatLng(position.latitude, position.longitude);
-  log("${position.latitude} and ${position.longitude}");
-  mapController.move(latLng, mapController.camera.zoom);
-  setState(() {});
+  @override
+  void dispose() {
+    locationUpdateTimer?.cancel(); // Cancel the timer
+    super.dispose();
+  }
 
-  if (image != null) {
-    File file = File(image!.path);
-    String fileName = (file.path);
-    log('File name: $fileName');
+  void startLocationUpdates() {
+    locationUpdateTimer = Timer.periodic(Duration(seconds: 3), (Timer t) async {
+      var position = await _determinePosition();
+      LatLng currentLocation = LatLng(position.latitude, position.longitude);
+      log("Current location: ${position.latitude}, ${position.longitude}");
+
+      // Update Firestore with the new rider location
+      var data = {
+        'RiderLocation':
+            GeoPoint(currentLocation.latitude, currentLocation.longitude),
+      };
+      await FirebaseFirestore.instance
+          .collection('status')
+          .doc(user.docStatus)
+          .update(data);
+
+      setState(() {
+        riderLocation = currentLocation;
+        // Optionally update the map position
+        mapController.move(riderLocation, mapController.camera.zoom);
+      });
+    });
+  }
+
+  void save() async {
+    var position = await _determinePosition();
+    LatLng currentLocation = LatLng(position.latitude, position.longitude);
+    log("${position.latitude} and ${position.longitude}");
+    mapController.move(latLng, mapController.camera.zoom);
+    setState(() {});
+
+    if (image != null) {
+      File file = File(image!.path);
+      String fileName = (file.path);
+      log('File name: $fileName');
 
       Reference firebaseStorageRef =
-      FirebaseStorage.instance.ref().child('uploads/$fileName');
+          FirebaseStorage.instance.ref().child('uploads/$fileName');
       UploadTask uploadTask = firebaseStorageRef.putFile(file);
 
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
@@ -281,9 +361,10 @@ class _RiderstatusState extends State<Riderstatus> {
           log('Download URL: $downloadURL');
 
           var data = {
-            'status': status+1,
+            'status': status + 1,
             'image': downloadURL,
-            'RiderLocation':GeoPoint(currentLocation.latitude, currentLocation.longitude)
+            'RiderLocation':
+                GeoPoint(currentLocation.latitude, currentLocation.longitude)
           };
           await FirebaseFirestore.instance
               .collection('status')
@@ -292,10 +373,11 @@ class _RiderstatusState extends State<Riderstatus> {
         } catch (error) {
           log('Error getting download URL: $error');
         }
-        
-        setState(() {
-          status = status+1;
-        });
+
+        // setState(() {
+        //   status = status+1;
+        // });
+        // ignore: body_might_complete_normally_catch_error
       }).catchError((error) {
         log('Upload error: $error');
       });
@@ -304,25 +386,42 @@ class _RiderstatusState extends State<Riderstatus> {
     }
   }
 
- void loadDataAsync() async {
-  try {
-    final docSnapshot = await FirebaseFirestore.instance
-        .collection('status')
-        .doc(user.docStatus)
-        .get();
-    setState(() {
-      origin = docSnapshot['origin'] as String?;
-      destination =  docSnapshot['destination'] as String?;
-      status = docSnapshot['status'];
-      // You can also store other fields you need
-    });
-    
-    log("Origin: $status");
-  } catch (err) {
-    log("Error in loadDataAsync: $err");
+  void loadDataAsync() async {
+    try {
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('status')
+          .doc(user.docStatus)
+          .get();
+      setState(() {
+        origin = docSnapshot['origin'] as String?;
+        destination = docSnapshot['destination'] as String?;
+        status = docSnapshot['status'];
+
+        if (docSnapshot['senderlocation'] is GeoPoint) {
+          GeoPoint sendderGeo = docSnapshot['senderlocation'];
+          senderLocation  = LatLng(sendderGeo.latitude, sendderGeo.longitude);
+        } else if (docSnapshot['senderlocation'] is List) {
+          List<dynamic> senderList = docSnapshot['senderlocation'];
+          senderLocation  = LatLng(senderList[0],senderList[1]);
+        }
+         if (docSnapshot['receiverlocation'] is GeoPoint) {
+          GeoPoint sendderGeo = docSnapshot['receiverlocation'];
+          receiverLocation  = LatLng(sendderGeo.latitude, sendderGeo.longitude);
+        } else if (docSnapshot['receiverlocation'] is List) {
+          List<dynamic> senderList = docSnapshot['receiverlocation'];
+          receiverLocation  = LatLng(senderList[0],senderList[1]);
+        }
+
+        // You can also store other fields you need
+      });
+
+      log("Origin: $status");
+    } catch (err) {
+      log("Error in loadDataAsync: $err");
+    }
   }
 }
-}
+
 Future<Position> _determinePosition() async {
   bool serviceEnabled;
   LocationPermission permission;
