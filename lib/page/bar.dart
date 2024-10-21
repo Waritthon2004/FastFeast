@@ -1,4 +1,7 @@
+import 'package:fast_feast/page/home.dart';
+import 'package:fast_feast/page/sendlist.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class Bar extends StatelessWidget {
   const Bar({super.key});
@@ -24,6 +27,20 @@ class Bar extends StatelessWidget {
       selectedItemColor: const Color(0xFF5D939F),
       unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
+      onTap: _onItemTapped,
     );
+  }
+
+  void _onItemTapped(int index) {
+    switch (index) {
+      case 0:
+        Get.to(const HomePage());
+        break;
+      case 1:
+        Get.to(const Sendlist());
+        break;
+      case 2:
+        break;
+    }
   }
 }

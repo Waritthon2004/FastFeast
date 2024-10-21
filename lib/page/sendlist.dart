@@ -11,14 +11,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-class ProcessSendPage extends StatefulWidget {
-  const ProcessSendPage({super.key});
+class Sendlist extends StatefulWidget {
+  const Sendlist({super.key});
 
   @override
-  State<ProcessSendPage> createState() => _ProcessSendPageState();
+  State<Sendlist> createState() => _SendlistState();
 }
 
-class _ProcessSendPageState extends State<ProcessSendPage> {
+class _SendlistState extends State<Sendlist> {
   FirebaseFirestore db = FirebaseFirestore.instance;
   List<Status> status = [];
   late UserInfo user;
@@ -48,13 +48,13 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
                 ),
                 child: Column(
                   children: [
-                    const Text("สินค้ากำลังมาส่ง"),
+                    const Text("สินค้ากำลังไปส่ง"),
                     content(),
                     Padding(
                       padding: const EdgeInsets.only(top: 10, bottom: 10),
                       child: FilledButton(
                           onPressed: () {
-                            Data();
+                            Get.to(const showallPage());
                           },
                           child: Text("ดูรายละเอียดทั้งหมด")),
                     )
@@ -133,7 +133,7 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
       user = context.read<AppData>().user;
       var inboxRef = db.collection("status");
 
-      var query = inboxRef.where("receiver", isEqualTo: user.phone);
+      var query = inboxRef.where("sender", isEqualTo: user.phone);
 
       var result = await query.get();
 
@@ -177,7 +177,7 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
               .map((doc) {
                 try {
                   user.id = doc.id;
-                  user.role = 2;
+                  user.role = 1;
                   context.read<AppData>().user.id = user.id;
                   return Status.fromJson(doc.data() as Map<String, dynamic>);
                 } catch (e) {
@@ -190,45 +190,6 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
         });
         log('status found: ${status.length}');
         Get.to(const StatusPage());
-      } else {
-        setState(() {
-          status = [];
-        });
-        log('No status found.');
-      }
-    } catch (e) {
-      log("Error querying data: $e");
-    }
-  }
-
-  Future<void> Data() async {
-    try {
-      user = context.read<AppData>().user;
-      var inboxRef = db.collection("status");
-
-      var query = inboxRef.where("receiver", isEqualTo: user.phone);
-
-      var result = await query.get();
-
-      if (result.docs.isNotEmpty) {
-        setState(() {
-          status = result.docs
-              .map((doc) {
-                try {
-                  user.doc.add(doc.id);
-
-                  context.read<AppData>().user.id = user.id;
-                  return Status.fromJson(doc.data() as Map<String, dynamic>);
-                } catch (e) {
-                  log("Error parsing user data: $e");
-                  return null;
-                }
-              })
-              .whereType<Status>()
-              .toList();
-        });
-
-        Get.to(const showallPage());
       } else {
         setState(() {
           status = [];
