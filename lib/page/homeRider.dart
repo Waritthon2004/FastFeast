@@ -28,7 +28,7 @@ class _HomeriderState extends State<Homerider> {
     user = context.read<AppData>().user;
     log("myname:${user.name}");
     log("myname:${user.phone}");
-  
+
     loadData = loadDataAsync();
   }
 
@@ -37,7 +37,6 @@ class _HomeriderState extends State<Homerider> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF1ABBE0),
-    
       ),
       drawer: const MyDrawer(),
       body: SingleChildScrollView(
@@ -144,7 +143,6 @@ class _HomeriderState extends State<Homerider> {
                       origin: doc['origin'],
                       location: doc['destination'],
                       doc: doc.id,
-                 
                       phone: user.phone);
                 },
               );
@@ -161,7 +159,6 @@ class _HomeriderState extends State<Homerider> {
           .collection('status')
           .where('status', isEqualTo: 0);
       QuerySnapshot querySnapshot = await collectionRef.get();
-
 
       return querySnapshot;
     } catch (err) {
@@ -255,7 +252,7 @@ class DeliveryItemWidget extends StatelessWidget {
                     if (querySnapshot.docs.isNotEmpty) {
                       Get.snackbar('ผิดพลาด', 'คุณมีสินค้าต้องส่งอยู่เเล้ว',
                           snackPosition: SnackPosition.TOP);
-                          return;
+                      return;
                     }
                   } catch (e) {
                     log('Error querying Firestore: $e');

@@ -71,7 +71,8 @@ class _RiderstatusState extends State<Riderstatus> {
                 color: Color(0xFF1ABBE0),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(20), // Bottom-left corner radius
-                  bottomRight: Radius.circular(20), // Bottom-right corner radius
+                  bottomRight:
+                      Radius.circular(20), // Bottom-right corner radius
                 ),
               ),
               width: MediaQuery.of(context).size.width,
@@ -258,8 +259,10 @@ class _RiderstatusState extends State<Riderstatus> {
             if (checkEmpty == 0) ...[
               const Column(
                 children: [
-                  
-                  Text("[คุณยังไม่มีสินค้าที่ต้องส่ง]",style: TextStyle(fontSize: 15,color: Color.fromARGB(255, 87, 71, 71)))],
+                  Text("[คุณยังไม่มีสินค้าที่ต้องส่ง]",
+                      style: TextStyle(
+                          fontSize: 15, color: Color.fromARGB(255, 87, 71, 71)))
+                ],
               )
             ]
           ]),
@@ -271,40 +274,40 @@ class _RiderstatusState extends State<Riderstatus> {
   }
 
   void realtime() {
-  try {
-    log("message:$doc");
-    FirebaseFirestore.instance
-        .collection('status')
-        .doc(doc)
-        .snapshots()
-        .listen((DocumentSnapshot snapshot) {
-      if (snapshot.exists) {
-        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-        setState(() {
-          status = data['status'];
+    try {
+      log("message:$doc");
+      FirebaseFirestore.instance
+          .collection('status')
+          .doc(doc)
+          .snapshots()
+          .listen((DocumentSnapshot snapshot) {
+        if (snapshot.exists) {
+          Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+          setState(() {
+            status = data['status'];
 
-          // Check if status is 3, and if so, stop location updates
-          if (status == 3) {
-            stopLocationUpdates();
+            // Check if status is 3, and if so, stop location updates
+            if (status == 3) {
+              stopLocationUpdates();
               Get.snackbar('ส่งสินค้าเสร็จสิ้น', 'กลับไปหน้าแรก',
-                          snackPosition: SnackPosition.TOP);
-            Get.to(const Homerider());
-          }
+                  snackPosition: SnackPosition.TOP);
+              Get.to(const Homerider());
+            }
 
-          if (data['RiderLocation'] is GeoPoint) {
-            GeoPoint riderGeo = data['RiderLocation'];
-            riderLocation = LatLng(riderGeo.latitude, riderGeo.longitude);
-          } else if (data['RiderLocation'] is List) {
-            List<dynamic> riderList = data['RiderLocation'];
-            riderLocation = LatLng(riderList[0], riderList[1]);
-          }
-        });
-      }
-    });
-  } catch (e) {
-    log("Error in realtime(): ${e.toString()}");
+            if (data['RiderLocation'] is GeoPoint) {
+              GeoPoint riderGeo = data['RiderLocation'];
+              riderLocation = LatLng(riderGeo.latitude, riderGeo.longitude);
+            } else if (data['RiderLocation'] is List) {
+              List<dynamic> riderList = data['RiderLocation'];
+              riderLocation = LatLng(riderList[0], riderList[1]);
+            }
+          });
+        }
+      });
+    } catch (e) {
+      log("Error in realtime(): ${e.toString()}");
+    }
   }
-}
 
   void camera() async {
     final ImagePicker picker = ImagePicker();
@@ -404,39 +407,38 @@ class _RiderstatusState extends State<Riderstatus> {
   //   locationUpdateTimer?.cancel(); // Cancel the timer
   //   super.dispose();
   // }
-void stopLocationUpdates() {
-  if (locationUpdateTimer != null) {
-    locationUpdateTimer?.cancel();
-    log("Location updates stopped.");
+  void stopLocationUpdates() {
+    if (locationUpdateTimer != null) {
+      locationUpdateTimer?.cancel();
+      log("Location updates stopped.");
+    }
   }
-}
 
-void startLocationUpdates() {
-  try {
-    locationUpdateTimer =
-        Timer.periodic(Duration(seconds: 3), (Timer t) async {
-      var position = await _determinePosition();
-      LatLng currentLocation = LatLng(position.latitude, position.longitude);
-      log("Current1 location: ${position.latitude}, ${position.longitude}");
-      var data = {
-        'RiderLocation':
-            GeoPoint(currentLocation.latitude, currentLocation.longitude),
-      };
-      await FirebaseFirestore.instance
-          .collection('status')
-          .doc(doc)
-          .update(data);
+  void startLocationUpdates() {
+    try {
+      locationUpdateTimer =
+          Timer.periodic(Duration(seconds: 3), (Timer t) async {
+        var position = await _determinePosition();
+        LatLng currentLocation = LatLng(position.latitude, position.longitude);
+        log("Current1 location: ${position.latitude}, ${position.longitude}");
+        var data = {
+          'RiderLocation':
+              GeoPoint(currentLocation.latitude, currentLocation.longitude),
+        };
+        await FirebaseFirestore.instance
+            .collection('status')
+            .doc(doc)
+            .update(data);
 
-      setState(() {
-        riderLocation = currentLocation;
-        //mapController.move(riderLocation, mapController.camera.zoom);
+        setState(() {
+          riderLocation = currentLocation;
+          //mapController.move(riderLocation, mapController.camera.zoom);
+        });
       });
-    });
-  } catch (e) {
-    log(e.toString());
+    } catch (e) {
+      log(e.toString());
+    }
   }
-}
-
 
   void save() async {
     log("${status.toString()}:xxxxStsatus");
@@ -521,10 +523,10 @@ void startLocationUpdates() {
             receiverLocation = LatLng(receiverList[0], receiverList[1]);
           }
         });
-        
+
         checkEmpty = 1;
-         startLocationUpdates();
-          log("Chk:$checkEmpty");
+        startLocationUpdates();
+        log("Chk:$checkEmpty");
       } else {
         checkEmpty = 0;
         log("No documents found.");
