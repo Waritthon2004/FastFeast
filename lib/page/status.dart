@@ -167,13 +167,13 @@ class _StatusPageState extends State<StatusPage> {
                           : u.status == 1
                               ? const Text("ไรเดอร์มารับสินค้า")
                               : u.status == 3
-                                  ? const Text("ไรเดอร์กำลังมาส่งของ")
+                                  ? const Text("ไรเดอร์มาส่งของแล้ว")
                                   : u.status == 4
                                       ? const Text("ส่งของเสร็จสิ้น")
                                       : const SizedBox(),
                     ),
                   ),
-                  if (u.status == 0)
+                  if (u.status == 0 && user.role == 2)
                     content()
                   else if (rider.isNotEmpty && u.status != 3)
                     content2()
