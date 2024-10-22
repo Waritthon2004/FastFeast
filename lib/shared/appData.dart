@@ -14,4 +14,6 @@ class UserInfo {
   String docStatus = "";
   String address = "";
   String id = "";
+  List doc = [];
+  int role = 0;
 }

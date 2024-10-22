@@ -184,6 +184,13 @@ class _StatusPageState extends State<StatusPage> {
                       }
                     },
                   ),
+                if (u.status == 4 && user.role == 2)
+                  FilledButton(
+                    onPressed: () {},
+                    child: const Text("รับสินค้า"),
+                  )
+                else
+                  const SizedBox(),
               ],
             );
           }).toList(),
@@ -251,6 +258,38 @@ class _StatusPageState extends State<StatusPage> {
       } else {
         setState(() {
           rider = [];
+        });
+        log('No riders found.');
+      }
+    } catch (e) {
+      log("Error querying data: $e");
+    }
+
+    try {
+      var riderRef = db.collection("send");
+      var query =
+          riderRef.where("description", isEqualTo: status[0].description);
+
+      var result = await query.get();
+
+      if (result.docs.isNotEmpty) {
+        setState(() {
+          product = result.docs
+              .map((doc) {
+                try {
+                  return Product.fromJson(doc.data() as Map<String, dynamic>);
+                } catch (e) {
+                  log("Error parsing rider data: $e");
+                  return null;
+                }
+              })
+              .whereType<Product>()
+              .toList();
+        });
+        log('Riders found: ${product.length}');
+      } else {
+        setState(() {
+          product = [];
         });
         log('No riders found.');
       }
