@@ -30,8 +30,9 @@ class _SenderPageState extends State<SenderPage> {
   final MapController mapController = MapController();
   FirebaseFirestore db = FirebaseFirestore.instance;
   String phone = "";
-  LatLng currentLocation = const LatLng(16.246825669508297, 103.25199289277295);
+  LatLng currentLocation = LatLng(16.246825669508297, 103.25199289277295);
   late LatLng latLng;
+  LatLng showw = LatLng(0, 0);
   List<User> users = [];
   String stay = "Mahasarakham University";
   @override
@@ -134,6 +135,7 @@ class _SenderPageState extends State<SenderPage> {
                                                     u.location.latitude,
                                                     u.location.longitude);
                                                 await queryDatafillter();
+                                                showw = latLng;
                                                 users = [];
                                               });
                                             },
@@ -160,9 +162,20 @@ class _SenderPageState extends State<SenderPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: FilledButton(
-                      onPressed: save,
-                      child: const Text("บันทึก"),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        showw.latitude != 0
+                            ? FilledButton(
+                                onPressed: show,
+                                child: const Text("ตัวอย่างเส้นทาง"),
+                              )
+                            : SizedBox(),
+                        FilledButton(
+                          onPressed: save,
+                          child: const Text("บันทึก"),
+                        )
+                      ],
                     ),
                   ),
                 ],
@@ -505,6 +518,64 @@ class _SenderPageState extends State<SenderPage> {
     } catch (e) {
       log("Error querying data: $e");
     }
+  }
+
+  void show() {
+    Get.defaultDialog(
+      title: 'Select your location',
+      content: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Column(
+            children: [
+              SizedBox(
+                width: 300,
+                height: 300,
+                child: FlutterMap(
+                  mapController: mapController,
+                  options: MapOptions(
+                    initialCenter: currentLocation,
+                    initialZoom: 15.0,
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.example.app',
+                      maxNativeZoom: 19,
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: currentLocation,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(Icons.location_pin,
+                              color: Colors.red, size: 40),
+                        ),
+                        Marker(
+                          point: showw,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(Icons.location_pin,
+                              color: Color.fromARGB(255, 32, 55, 227),
+                              size: 40),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+      cancel: ElevatedButton(
+        onPressed: () {
+          Get.back();
+        },
+        child: const Text('Exit'),
+      ),
+    );
   }
 }
 

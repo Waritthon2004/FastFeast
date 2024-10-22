@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/model/product.dart';
 import 'package:fast_feast/model/rider.dart';
+
 import 'package:fast_feast/model/status.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
@@ -245,7 +246,8 @@ class _StatusPageState extends State<StatusPage> {
   Future<void> queryUserData() async {
     try {
       var riderRef = db.collection("user");
-      var query = riderRef.where("rider", isEqualTo: status[0].rider);
+      var query = riderRef.where("phone", isEqualTo: status[0].rider);
+
       var result = await query.get();
 
       if (result.docs.isNotEmpty) {
