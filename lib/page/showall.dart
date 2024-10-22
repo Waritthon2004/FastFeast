@@ -25,7 +25,9 @@ class _ShowAllPageState extends State<ShowAllPage> {
   late UserInfo user;
   List<List<Allproduct>> allProductList = [];
   List<Allproduct> allproduct = [];
-  List<Color> se = [];
+  Map<String, Color> productColors = {};
+
+  List<Color> se = []; // List for storing colors
 
   @override
   void initState() {
@@ -84,19 +86,29 @@ class _ShowAllPageState extends State<ShowAllPage> {
                   ),
                   MarkerLayer(
                     markers: allProductList.expand((u) {
-                      Color markerColor = getRandomColor();
-                      se.add(markerColor);
                       return u.expand((m) {
+                        // Assign color based on the product's description or unique identifier
+                        if (!productColors.containsKey(m.description)) {
+                          productColors[m.description] = getRandomColor();
+                        }
+                        Color markerColor = productColors[m.description]!;
+
                         return [
                           Marker(
                             point: LatLng(
-                              m.senderlocation.latitude,
-                              m.senderlocation.longitude,
+                              m.status != 0
+                                  ? m.riderLocation.latitude
+                                  : m.senderlocation.latitude,
+                              m.status != 0
+                                  ? m.riderLocation.longitude
+                                  : m.senderlocation.longitude,
                             ),
                             width: 10,
                             height: 10,
                             child: Icon(
-                              Icons.location_pin,
+                              m.status != 0
+                                  ? Icons.motorcycle_rounded
+                                  : Icons.location_pin,
                               color: markerColor,
                               size: 30,
                             ),
@@ -123,9 +135,9 @@ class _ShowAllPageState extends State<ShowAllPage> {
             ),
             Column(
               children: allProductList.expand((u) {
-                return u.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  var m = entry.value;
+                return u.map((m) {
+                  // Use the same color from the map
+                  Color productColor = productColors[m.description]!;
 
                   return Padding(
                     padding: const EdgeInsets.only(top: 10),
@@ -154,7 +166,7 @@ class _ShowAllPageState extends State<ShowAllPage> {
                               Text("ผู้ส่ง : ${m.sender}"),
                               Icon(
                                 Icons.inventory_2,
-                                color: se[index],
+                                color: productColor, // Use the mapped color
                               ),
                             ],
                           ),
@@ -223,6 +235,8 @@ class _ShowAllPageState extends State<ShowAllPage> {
                 Allproduct.fromJson(result.data() as Map<String, dynamic>)
               ];
               allProductList.add(allproduct);
+              // Generate and store a new color for the product
+              se.add(getRandomColor());
             } catch (e) {
               print("Error parsing user data: $e");
               allproduct = [];
@@ -247,7 +261,6 @@ class _ShowAllPageState extends State<ShowAllPage> {
 
     // Clear existing markers
     allProductList = [];
-    se = [];
 
     for (var a in user.doc) {
       final docRef = db.collection("status").doc(a);
@@ -294,61 +307,5 @@ class _ShowAllPageState extends State<ShowAllPage> {
         onError: (error) => print("Listen failed: $error"),
       );
     }
-  }
-}
-
-class CustomStatusBar extends StatelessWidget {
-  final List<IconData> icons;
-  final int currentStep;
-
-  const CustomStatusBar({
-    Key? key,
-    required this.icons,
-    required this.currentStep,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(icons.length * 2 - 1, (index) {
-        if (index.isEven) {
-          final stepIndex = index ~/ 2;
-          final isCompleted = stepIndex < currentStep;
-          final isActive = stepIndex == currentStep;
-          return _buildStep(icons[stepIndex], isCompleted, isActive);
-        } else {
-          return _buildLine(index ~/ 2 < currentStep);
-        }
-      }),
-    );
-  }
-
-  Widget _buildStep(IconData icon, bool isCompleted, bool isActive) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isCompleted || isActive
-            ? const Color.fromARGB(255, 13, 228, 56)
-            : Colors.grey[300],
-      ),
-      child: Icon(
-        icon,
-        color: Colors.white,
-        size: 30,
-      ),
-    );
-  }
-
-  Widget _buildLine(bool isCompleted) {
-    return Container(
-      width: 40,
-      height: 2,
-      color: isCompleted
-          ? const Color.fromARGB(255, 0, 211, 14)
-          : Colors.grey[300],
-    );
   }
 }
