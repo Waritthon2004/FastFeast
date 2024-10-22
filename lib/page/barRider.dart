@@ -20,8 +20,8 @@ class BarRider extends StatelessWidget {
           label: 'ข้อมูลการขนส่ง',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.touch_app),
-          label: 'รับสินค้า',
+          icon: Icon(Icons.logout),
+          label: 'ออกจากระบบ',
         ),
       ],
       currentIndex: 0,

@@ -53,57 +53,59 @@ class _HomeriderState extends State<Homerider> {
   }
 
   Widget _buildHeader() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF1ABBE0),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
-        ),
-      ),
-      width: MediaQuery.of(context).size.width,
-      height: 150,
-      padding: const EdgeInsets.only(left: 50, bottom: 30),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: CircleAvatar(
-              radius: 60,
-              backgroundImage: NetworkImage(user.image),
-            ),
+    return PopScope(
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1ABBE0),
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
           ),
-          const SizedBox(width: 9),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'สวัสดี',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+        ),
+        width: MediaQuery.of(context).size.width,
+        height: 150,
+        padding: const EdgeInsets.only(left: 50, bottom: 30),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8, bottom: 3),
-                child: Text(
-                  user.name,
-                  style: const TextStyle(
+              child: CircleAvatar(
+                radius: 60,
+                backgroundImage: NetworkImage(user.image),
+              ),
+            ),
+            const SizedBox(width: 9),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'สวัสดี',
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, bottom: 3),
+                  child: Text(
+                    user.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

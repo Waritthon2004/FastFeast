@@ -40,136 +40,138 @@ class _ShowAllPageState extends State<ShowAllPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1ABBE0),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: NetworkImage(
-                    user.image,
-                  ),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            header(context),
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: 400,
-              child: FlutterMap(
-                mapController: mapController,
-                options: MapOptions(
-                  initialCenter: latLng,
-                  initialZoom: 12.0,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.example.app',
-                    maxNativeZoom: 19,
-                  ),
-                  MarkerLayer(
-                    markers: allProductList.expand((u) {
-                      Color markerColor = getRandomColor();
-                      se.add(markerColor);
-                      return u.expand((m) {
-                        return [
-                          Marker(
-                            point: LatLng(
-                              m.senderlocation.latitude,
-                              m.senderlocation.longitude,
-                            ),
-                            width: 10,
-                            height: 10,
-                            child: Icon(
-                              Icons.location_pin,
-                              color: markerColor,
-                              size: 30,
-                            ),
-                          ),
-                          Marker(
-                            point: LatLng(
-                              m.receiverlocation.latitude,
-                              m.receiverlocation.longitude,
-                            ),
-                            width: 10,
-                            height: 10,
-                            child: Icon(
-                              Icons.inventory_2,
-                              color: markerColor,
-                              size: 30,
-                            ),
-                          ),
-                        ];
-                      }).toList();
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              children: allProductList.expand((u) {
-                return u.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  var m = entry.value;
-
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Container(
-                      width: 300,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 100,
-                            height: 60,
-                            child: Image.network(m.image),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text("รายละเอียดสินค้า : ${m.description}"),
-                              Text("ผู้รับ : ${m.receiver}"),
-                              Text("ผู้ส่ง : ${m.sender}"),
-                              Icon(
-                                Icons.inventory_2,
-                                color: se[index],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+    return PopScope(
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF1ABBE0),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: NetworkImage(
+                      user.image,
                     ),
-                  );
-                }).toList();
-              }).toList(),
-            ),
-          ],
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              header(context),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: 400,
+                child: FlutterMap(
+                  mapController: mapController,
+                  options: MapOptions(
+                    initialCenter: latLng,
+                    initialZoom: 12.0,
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.example.app',
+                      maxNativeZoom: 19,
+                    ),
+                    MarkerLayer(
+                      markers: allProductList.expand((u) {
+                        Color markerColor = getRandomColor();
+                        se.add(markerColor);
+                        return u.expand((m) {
+                          return [
+                            Marker(
+                              point: LatLng(
+                                m.senderlocation.latitude,
+                                m.senderlocation.longitude,
+                              ),
+                              width: 10,
+                              height: 10,
+                              child: Icon(
+                                Icons.location_pin,
+                                color: markerColor,
+                                size: 30,
+                              ),
+                            ),
+                            Marker(
+                              point: LatLng(
+                                m.receiverlocation.latitude,
+                                m.receiverlocation.longitude,
+                              ),
+                              width: 10,
+                              height: 10,
+                              child: Icon(
+                                Icons.inventory_2,
+                                color: markerColor,
+                                size: 30,
+                              ),
+                            ),
+                          ];
+                        }).toList();
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                children: allProductList.expand((u) {
+                  return u.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    var m = entry.value;
+      
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Container(
+                        width: 300,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 100,
+                              height: 60,
+                              child: Image.network(m.image),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("รายละเอียดสินค้า : ${m.description}"),
+                                Text("ผู้รับ : ${m.receiver}"),
+                                Text("ผู้ส่ง : ${m.sender}"),
+                                Icon(
+                                  Icons.inventory_2,
+                                  color: se[index],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList();
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+        drawer: const MyDrawer(),
+        bottomNavigationBar: const Bar(),
       ),
-      drawer: const MyDrawer(),
-      bottomNavigationBar: const Bar(),
     );
   }
 

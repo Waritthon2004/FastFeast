@@ -56,213 +56,215 @@ class _RiderstatusState extends State<Riderstatus> {
   int checkEmpty = 0;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1ABBE0),
-        // title: Text("z:${user.phone}"),
-      ),
-      body: SingleChildScrollView(
-        child: Column(children: [
-          Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFF1ABBE0),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20), // Bottom-left corner radius
-                bottomRight: Radius.circular(20), // Bottom-right corner radius
+    return PopScope(
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF1ABBE0),
+          // title: Text("z:${user.phone}"),
+        ),
+        body: SingleChildScrollView(
+          child: Column(children: [
+            Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFF1ABBE0),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20), // Bottom-left corner radius
+                  bottomRight: Radius.circular(20), // Bottom-right corner radius
+                ),
               ),
-            ),
-            width: MediaQuery.of(context).size.width,
-            height: 120,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 10),
-                    child: Text("ข้อมูลการจัดส่ง",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 25,
-                            color: Colors.white)),
-                  ),
-                  CustomStatusBar(
-                    icons: const [
-                      Icons.hourglass_empty,
-                      Icons.phone_android,
-                      Icons.motorcycle,
-                      Icons.check_circle,
-                    ],
-                    currentStep: status,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          if (checkEmpty == 1) ...[
-            Column(
-              children: [
-                SizedBox(
-                  width: 340,
-                  height: 340,
-                  child: FlutterMap(
-                    mapController: mapController,
-                    options: MapOptions(
-                      initialCenter:
-                          riderLocation, // Use a default center for the map
-                      initialZoom: 1,
+              width: MediaQuery.of(context).size.width,
+              height: 120,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 10),
+                      child: Text("ข้อมูลการจัดส่ง",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25,
+                              color: Colors.white)),
                     ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.example.app',
-                        maxNativeZoom: 19,
+                    CustomStatusBar(
+                      icons: const [
+                        Icons.hourglass_empty,
+                        Icons.phone_android,
+                        Icons.motorcycle,
+                        Icons.check_circle,
+                      ],
+                      currentStep: status,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            if (checkEmpty == 1) ...[
+              Column(
+                children: [
+                  SizedBox(
+                    width: 340,
+                    height: 340,
+                    child: FlutterMap(
+                      mapController: mapController,
+                      options: MapOptions(
+                        initialCenter:
+                            riderLocation, // Use a default center for the map
+                        initialZoom: 1,
                       ),
-                      MarkerLayer(
-                        markers: [
-                          // 1. Rider location marker
-                          Marker(
-                            point: riderLocation,
-                            width: 30,
-                            height: 30,
-                            child: const Icon(Icons.motorcycle_rounded,
-                                color: Color.fromARGB(255, 218, 193, 0),
-                                size: 30),
-                          ),
-                          // 2. Receiver location marker
-                          Marker(
-                            point: receiverLocation,
-                            width: 30,
-                            height: 30,
-                            child: const Icon(Icons.location_pin,
-                                color: Color.fromARGB(255, 33, 89, 243),
-                                size: 30),
-                          ),
-                          // 3. Conditionally add the sender location marker if status > 1
-                          if (status <= 1)
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.example.app',
+                          maxNativeZoom: 19,
+                        ),
+                        MarkerLayer(
+                          markers: [
+                            // 1. Rider location marker
                             Marker(
-                              point: senderLocation,
+                              point: riderLocation,
+                              width: 30,
+                              height: 30,
+                              child: const Icon(Icons.motorcycle_rounded,
+                                  color: Color.fromARGB(255, 218, 193, 0),
+                                  size: 30),
+                            ),
+                            // 2. Receiver location marker
+                            Marker(
+                              point: receiverLocation,
                               width: 30,
                               height: 30,
                               child: const Icon(Icons.location_pin,
-                                  color: Color.fromARGB(255, 206, 7, 4),
+                                  color: Color.fromARGB(255, 33, 89, 243),
                                   size: 30),
                             ),
-                        ],
-                      ),
-                    ],
+                            // 3. Conditionally add the sender location marker if status > 1
+                            if (status <= 1)
+                              Marker(
+                                point: senderLocation,
+                                width: 30,
+                                height: 30,
+                                child: const Icon(Icons.location_pin,
+                                    color: Color.fromARGB(255, 206, 7, 4),
+                                    size: 30),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Container(
-                      width: 340,
-                      height: 155,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: const Offset(
-                                0, 3), // changes position of shadow
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(Icons.local_shipping,
-                                        color: Colors.orange),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      origin!,
-                                      style: const TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10),
-                                  child: Container(
-                                    width:
-                                        1, // This controls the thickness of the vertical line
-                                    height:
-                                        50, // This controls the height of the line
-                                    color: Colors.grey, // Line color
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.location_on,
-                                        color: Colors.blue),
-                                    const SizedBox(width: 8),
-                                    Text(destination!,
-                                        style: const TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            ElevatedButton(
-                              onPressed: camera,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 56, 104, 248),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                minimumSize: const Size(80, 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      16), // Border radius of 10
-                                ),
-                              ),
-                              child: const Text(
-                                'อัพเดตสถานะ',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    fontSize: 18),
-                              ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Container(
+                        width: 340,
+                        height: 155,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(
+                                  0, 3), // changes position of shadow
                             ),
                           ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.local_shipping,
+                                          color: Colors.orange),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        origin!,
+                                        style: const TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: Container(
+                                      width:
+                                          1, // This controls the thickness of the vertical line
+                                      height:
+                                          50, // This controls the height of the line
+                                      color: Colors.grey, // Line color
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.location_on,
+                                          color: Colors.blue),
+                                      const SizedBox(width: 8),
+                                      Text(destination!,
+                                          style: const TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              ElevatedButton(
+                                onPressed: camera,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      const Color.fromARGB(255, 56, 104, 248),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
+                                  minimumSize: const Size(80, 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        16), // Border radius of 10
+                                  ),
+                                ),
+                                child: const Text(
+                                  'อัพเดตสถานะ',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontSize: 18),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                // TextButton(onPressed: dispose, child: const Text("xx")),
-              ],
-            )
-          ],
-          if (checkEmpty == 0) ...[
-            const Column(
-              children: [
-                
-                Text("[คุณยังไม่มีสินค้าที่ต้องส่ง]",style: TextStyle(fontSize: 15,color: Color.fromARGB(255, 87, 71, 71)))],
-            )
-          ]
-        ]),
+                  // TextButton(onPressed: dispose, child: const Text("xx")),
+                ],
+              )
+            ],
+            if (checkEmpty == 0) ...[
+              const Column(
+                children: [
+                  
+                  Text("[คุณยังไม่มีสินค้าที่ต้องส่ง]",style: TextStyle(fontSize: 15,color: Color.fromARGB(255, 87, 71, 71)))],
+              )
+            ]
+          ]),
+        ),
+        drawer: const MyDrawer(),
+        bottomNavigationBar: const BarRider(),
       ),
-      drawer: const MyDrawer(),
-      bottomNavigationBar: const BarRider(),
     );
   }
 
