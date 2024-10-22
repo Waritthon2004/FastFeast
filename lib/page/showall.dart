@@ -91,7 +91,7 @@ class _ShowAllPageState extends State<ShowAllPage> {
                         return u.expand((m) {
                           // Assign color based on the product's description or unique identifier
                           if (!productColors.containsKey(m.description)) {
-                            productColors[m.description] = getRandomColor();
+                            productColors[m.description!] = getRandomColor();
                           }
                           Color markerColor = productColors[m.description]!;
 
@@ -99,11 +99,11 @@ class _ShowAllPageState extends State<ShowAllPage> {
                             Marker(
                               point: LatLng(
                                 m.status != 0
-                                    ? m.riderLocation.latitude
-                                    : m.senderlocation.latitude,
+                                    ? m.riderLocation!.latitude
+                                    : m.senderlocation!.latitude,
                                 m.status != 0
-                                    ? m.riderLocation.longitude
-                                    : m.senderlocation.longitude,
+                                    ? m.riderLocation!.longitude
+                                    : m.senderlocation!.longitude,
                               ),
                               width: 10,
                               height: 10,
@@ -117,8 +117,8 @@ class _ShowAllPageState extends State<ShowAllPage> {
                             ),
                             Marker(
                               point: LatLng(
-                                m.receiverlocation.latitude,
-                                m.receiverlocation.longitude,
+                                m.receiverlocation!.latitude,
+                                m.receiverlocation!.longitude,
                               ),
                               width: 10,
                               height: 10,
@@ -157,7 +157,7 @@ class _ShowAllPageState extends State<ShowAllPage> {
                             Container(
                               width: 100,
                               height: 60,
-                              child: Image.network(m.image),
+                              child: Image.network(m.image!),
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
