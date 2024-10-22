@@ -254,7 +254,7 @@ class DeliveryItemWidget extends StatelessWidget {
                           return;
                     }
                   } catch (e) {
-                    print('Error querying Firestore: $e');
+                    log('Error querying Firestore: $e');
                   }
                   Position position = await _determinePosition();
                   LatLng currentLocation =
