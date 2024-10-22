@@ -187,7 +187,7 @@ class _StatusPageState extends State<StatusPage> {
                         }
                       },
                     ),
-                  if (u.status == 4 && user.role == 2)
+                  if (u.status == 3 && user.role == 2)
                     FilledButton(
                       onPressed: () async {
                         await FirebaseFirestore.instance

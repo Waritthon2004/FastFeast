@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class AppData with ChangeNotifier {
@@ -16,6 +17,7 @@ class UserInfo {
   String docStatus = "";
   String address = "";
   String id = "";
+  late GeoPoint location;
   List doc = [];
   int role = 0;
 }

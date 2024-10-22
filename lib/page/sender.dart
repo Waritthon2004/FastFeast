@@ -30,7 +30,7 @@ class _SenderPageState extends State<SenderPage> {
   final MapController mapController = MapController();
   FirebaseFirestore db = FirebaseFirestore.instance;
   String phone = "";
-  LatLng currentLocation = LatLng(16.246825669508297, 103.25199289277295);
+  late LatLng currentLocation;
   late LatLng latLng;
   LatLng showw = LatLng(0, 0);
   List<User> users = [];
@@ -40,6 +40,7 @@ class _SenderPageState extends State<SenderPage> {
   void initState() {
     super.initState();
     user = context.read<AppData>().user;
+    currentLocation = LatLng(user.location.latitude, user.location.longitude);
     stay = user.address;
   }
 
@@ -84,8 +85,8 @@ class _SenderPageState extends State<SenderPage> {
                                     color: Colors.white, // สีพื้นหลัง
                                     boxShadow: [
                                       BoxShadow(
-                                        color:
-                                            Colors.grey.withOpacity(0.5), // สีเงา
+                                        color: Colors.grey
+                                            .withOpacity(0.5), // สีเงา
                                         spreadRadius:
                                             0, // จำกัดเงาให้อยู่เฉพาะด้านล่าง
                                         blurRadius: 7, // ระยะเบลอของเงา
