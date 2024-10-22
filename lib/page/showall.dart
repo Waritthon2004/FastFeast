@@ -94,7 +94,7 @@ class _ShowAllPageState extends State<ShowAllPage> {
                             productColors[m.description] = getRandomColor();
                           }
                           Color markerColor = productColors[m.description]!;
-      
+
                           return [
                             Marker(
                               point: LatLng(
@@ -140,7 +140,7 @@ class _ShowAllPageState extends State<ShowAllPage> {
                   return u.map((m) {
                     // Use the same color from the map
                     Color productColor = productColors[m.description]!;
-      
+
                     return Padding(
                       padding: const EdgeInsets.only(top: 10),
                       child: Container(

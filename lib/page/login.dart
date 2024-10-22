@@ -127,13 +127,14 @@ class _LoginState extends State<Login> {
         info.image = querySnapshot.docs[0]['url'];
         info.name = querySnapshot.docs[0]['name'];
         info.phone = querySnapshot.docs[0]['phone'];
+        info.phone = querySnapshot.docs[0]['phone'];
 
         // ignore: use_build_context_synchronously
         context.read<AppData>().user = info;
 
         if (querySnapshot.docs[0]['type'] == 1) {
           info.address = querySnapshot.docs[0]['address'];
-          
+          info.location = querySnapshot.docs[0]['location'];
           context.read<AppData>().user = info;
           Get.to(const HomePage());
         } else if (querySnapshot.docs[0]['type'] == 2) {

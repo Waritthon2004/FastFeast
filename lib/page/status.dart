@@ -24,7 +24,7 @@ class StatusPage extends StatefulWidget {
 }
 
 class _StatusPageState extends State<StatusPage> {
-  String doc='';
+  String doc = '';
   MapController mapController = MapController();
   List<Status> status = [];
   List<UserModel> rider = [];
@@ -111,8 +111,8 @@ class _StatusPageState extends State<StatusPage> {
                           markers: [
                             Marker(
                               point: LatLng(
-                                u.receiverlocation!.latitude,
-                                u.receiverlocation!.longitude,
+                                u.receiverLocation!.latitude,
+                                u.receiverLocation!.longitude,
                               ),
                               width: 10,
                               height: 10,
@@ -122,8 +122,8 @@ class _StatusPageState extends State<StatusPage> {
                             (u.status! > 0)
                                 ? Marker(
                                     point: LatLng(
-                                      u.RiderLocation!.latitude,
-                                      u.RiderLocation!.longitude,
+                                      u.riderLocation!.latitude,
+                                      u.riderLocation!.longitude,
                                     ),
                                     width: 10,
                                     height: 10,
@@ -135,8 +135,8 @@ class _StatusPageState extends State<StatusPage> {
                                   )
                                 : Marker(
                                     point: LatLng(
-                                      u.senderlocation!.latitude,
-                                      u.senderlocation!.longitude,
+                                      u.senderLocation!.latitude,
+                                      u.senderLocation!.longitude,
                                     ),
                                     width: 10,
                                     height: 10,
@@ -175,8 +175,10 @@ class _StatusPageState extends State<StatusPage> {
                   ),
                   if (u.status == 0)
                     content()
-                  else if (rider.isNotEmpty)
+                  else if (rider.isNotEmpty && u.status != 3)
                     content2()
+                  else if (rider.isNotEmpty && u.status == 3)
+                    content3()
                   else
                     FutureBuilder(
                       future: queryUserData(),
@@ -195,20 +197,17 @@ class _StatusPageState extends State<StatusPage> {
                       onPressed: () async {
                         try {
                           await FirebaseFirestore.instance
-                            .collection('status')
-                            .doc(doc)
-                            .update({
-                          'status': 4,
-                         
-                        });
-                         Get.snackbar('Success', 'รับสินค้าเสร็จสิ้น',
-          snackPosition: SnackPosition.BOTTOM);
-                         Get.to(const HomePage());
+                              .collection('status')
+                              .doc(doc)
+                              .update({
+                            'status': 4,
+                          });
+                          Get.snackbar('Success', 'รับสินค้าเสร็จสิ้น',
+                              snackPosition: SnackPosition.BOTTOM);
+                          Get.to(const HomePage());
                         } catch (e) {
                           log(e.toString());
                         }
-                        
-                        
                       },
                       child: const Text("รับสินค้า"),
                     )
@@ -288,7 +287,7 @@ class _StatusPageState extends State<StatusPage> {
     } catch (e) {
       log("Error querying data: $e");
     }
-
+    queryData();
     try {
       var riderRef = db.collection("send");
       var query =
@@ -393,6 +392,22 @@ class _StatusPageState extends State<StatusPage> {
             height: 300,
             child: Image.network(
                 p.image), // Assuming r is a map containing 'image'
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget content3() {
+    return Column(
+      children: status.map((p) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Container(
+            width: 300,
+            height: 300,
+            child: Image.network(
+                p.statusImage!), // Assuming r is a map containing 'image'
           ),
         );
       }).toList(),

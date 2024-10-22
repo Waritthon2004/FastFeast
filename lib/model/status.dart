@@ -1,62 +1,72 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Status {
-  GeoPoint? RiderLocation;
+  GeoPoint? riderLocation;
   String? description;
   String? destination;
   String? image;
   String? origin;
   String? receiver;
-  GeoPoint? receiverlocation;
+  GeoPoint? receiverLocation;
   String? sender;
-  GeoPoint? senderlocation;
+  GeoPoint? senderLocation;
   String? rider;
+  String? statusImage;
   int? status;
 
   Status({
     this.rider,
-    this.RiderLocation,
+    this.statusImage,
+    this.riderLocation,
     this.description,
     this.destination,
     this.image,
     this.origin,
     this.receiver,
-    this.receiverlocation,
+    this.receiverLocation,
     this.sender,
-    this.senderlocation,
+    this.senderLocation,
     this.status,
   });
 
-  // ฟังก์ชันสำหรับแปลงจาก Firestore Document เป็น Model
+  // Function to convert Firestore Document to Model
   factory Status.fromJson(Map<String, dynamic> json) {
     return Status(
       rider: json['rider'],
-      RiderLocation: json['RiderLocation'],
+      riderLocation: json['RiderLocation'] != null
+          ? json['RiderLocation'] as GeoPoint
+          : null,
       description: json['description'],
       destination: json['destination'],
       image: json['image'],
       origin: json['origin'],
+      statusImage: json['Statusimage'],
       receiver: json['receiver'],
-      receiverlocation: json['receiverlocation'],
+      receiverLocation: json['receiverlocation'] != null
+          ? json['receiverlocation'] as GeoPoint
+          : null,
       sender: json['sender'],
-      senderlocation: json['senderlocation'],
+      senderLocation: json['senderlocation'] != null
+          ? json['senderlocation'] as GeoPoint
+          : null,
       status: json['status'],
     );
   }
 
-  // ฟังก์ชันสำหรับแปลงจาก Model เป็น JSON (เพื่อนำไปใช้บันทึกใน Firestore)
+  // Function to convert Model to JSON (for saving to Firestore)
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (rider != null) data['rider'] = rider;
-    if (RiderLocation != null) data['RiderLocation'] = RiderLocation;
+    if (riderLocation != null) data['RiderLocation'] = riderLocation;
     if (description != null) data['description'] = description;
     if (destination != null) data['destination'] = destination;
     if (image != null) data['image'] = image;
     if (origin != null) data['origin'] = origin;
     if (receiver != null) data['receiver'] = receiver;
-    if (receiverlocation != null) data['receiverlocation'] = receiverlocation;
+    if (receiverLocation != null) data['receiverlocation'] = receiverLocation;
     if (sender != null) data['sender'] = sender;
-    if (senderlocation != null) data['senderlocation'] = senderlocation;
+    if (senderLocation != null) data['senderlocation'] = senderLocation;
+    if (statusImage != null) data['Statusimage'] = statusImage;
     if (status != null) data['status'] = status;
     return data;
   }
