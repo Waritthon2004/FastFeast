@@ -458,7 +458,7 @@ void startLocationUpdates() {
           log('Download URL: $downloadURL');
           var data = {
             'status': status + 1,
-            'image': downloadURL,
+            'Statusimage': downloadURL,
             'RiderLocation':
                 GeoPoint(currentLocation.latitude, currentLocation.longitude)
           };

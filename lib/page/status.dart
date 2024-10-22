@@ -23,7 +23,7 @@ class StatusPage extends StatefulWidget {
 class _StatusPageState extends State<StatusPage> {
   MapController mapController = MapController();
   List<Status> status = [];
-  List<Rider> rider = [];
+  List<UserModel> rider = [];
   List<Product> product = [];
   late UserInfo user;
 
@@ -186,7 +186,16 @@ class _StatusPageState extends State<StatusPage> {
                   ),
                 if (u.status == 4 && user.role == 2)
                   FilledButton(
-                    onPressed: () {},
+                    onPressed: () async{
+                      await FirebaseFirestore.instance
+                        .collection('status')
+                        .doc('doc')
+                        .update({
+                      'status': 4,
+                     
+                     
+                    });
+                    },
                     child: const Text("รับสินค้า"),
                   )
                 else
@@ -206,7 +215,7 @@ class _StatusPageState extends State<StatusPage> {
       user = context.read<AppData>().user;
 
       var inboxRef = db.collection("status").doc(user.id);
-
+      log(inboxRef.id);
       var result = await inboxRef.get(); // Fetch a single document
 
       if (result.exists) {
@@ -235,9 +244,8 @@ class _StatusPageState extends State<StatusPage> {
 
   Future<void> queryUserData() async {
     try {
-      var riderRef = db.collection("rider");
-      var query = riderRef.where("phone", isEqualTo: status[0].rider);
-
+      var riderRef = db.collection("user");
+      var query = riderRef.where("rider", isEqualTo: status[0].rider);
       var result = await query.get();
 
       if (result.docs.isNotEmpty) {
@@ -245,13 +253,13 @@ class _StatusPageState extends State<StatusPage> {
           rider = result.docs
               .map((doc) {
                 try {
-                  return Rider.fromJson(doc.data() as Map<String, dynamic>);
+                  return UserModel.fromJson(doc.data() as Map<String, dynamic>);
                 } catch (e) {
                   log("Error parsing rider data: $e");
                   return null;
                 }
               })
-              .whereType<Rider>()
+              .whereType<UserModel>()
               .toList();
         });
         log('Riders found: ${rider.length}');
@@ -397,7 +405,7 @@ class _StatusPageState extends State<StatusPage> {
                   Container(
                     width: 100,
                     height: 60,
-                    child: Image.network(r.images), // Image URL for rider
+                    child: Image.network(r.url), // Image URL for rider
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
