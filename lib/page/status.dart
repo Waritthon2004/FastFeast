@@ -6,10 +6,12 @@ import 'package:fast_feast/model/rider.dart';
 import 'package:fast_feast/model/status.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
+import 'package:fast_feast/page/home.dart';
 import 'package:fast_feast/shared/appData.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +24,7 @@ class StatusPage extends StatefulWidget {
 }
 
 class _StatusPageState extends State<StatusPage> {
+  String doc='';
   MapController mapController = MapController();
   List<Status> status = [];
   List<UserModel> rider = [];
@@ -190,12 +193,22 @@ class _StatusPageState extends State<StatusPage> {
                   if (u.status == 3 && user.role == 2)
                     FilledButton(
                       onPressed: () async {
-                        await FirebaseFirestore.instance
+                        try {
+                          await FirebaseFirestore.instance
                             .collection('status')
-                            .doc('doc')
+                            .doc(doc)
                             .update({
                           'status': 4,
+                         
                         });
+                         Get.snackbar('Success', 'รับสินค้าเสร็จสิ้น',
+          snackPosition: SnackPosition.BOTTOM);
+                         Get.to(const HomePage());
+                        } catch (e) {
+                          log(e.toString());
+                        }
+                        
+                        
                       },
                       child: const Text("รับสินค้า"),
                     )
@@ -217,7 +230,7 @@ class _StatusPageState extends State<StatusPage> {
       user = context.read<AppData>().user;
 
       var inboxRef = db.collection("status").doc(user.id);
-      log(inboxRef.id);
+      doc = inboxRef.id;
       var result = await inboxRef.get(); // Fetch a single document
 
       if (result.exists) {
