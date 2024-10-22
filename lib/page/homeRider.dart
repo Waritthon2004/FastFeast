@@ -54,6 +54,7 @@ class _HomeriderState extends State<Homerider> {
 
   Widget _buildHeader() {
     return PopScope(
+      canPop: false,
       child: Container(
         decoration: const BoxDecoration(
           color: Color(0xFF1ABBE0),

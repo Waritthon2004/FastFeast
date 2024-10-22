@@ -44,6 +44,7 @@ class _StatusPageState extends State<StatusPage> {
   var db = FirebaseFirestore.instance;
   Widget build(BuildContext context) {
     return PopScope(
+      canPop: false,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: const Color(0xFF1ABBE0),

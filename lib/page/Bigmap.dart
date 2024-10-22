@@ -41,6 +41,7 @@ class _CheckmapState extends State<Checkmap> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      canPop: false,
       child: Scaffold(
         body: Stack(
           children: [

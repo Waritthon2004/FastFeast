@@ -1,4 +1,5 @@
 import 'package:fast_feast/page/homeRider.dart';
+import 'package:fast_feast/page/login.dart';
 import 'package:fast_feast/page/riderStatus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -41,7 +42,7 @@ class BarRider extends StatelessWidget {
       Get.to(const Riderstatus());
         break;
       case 2:
-      
+       Get.to(const Login());
         break;
      
     }

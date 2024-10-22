@@ -41,6 +41,7 @@ class _ShowAllPageState extends State<ShowAllPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      canPop: false,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: const Color(0xFF1ABBE0),
