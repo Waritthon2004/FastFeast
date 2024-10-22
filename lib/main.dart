@@ -17,7 +17,8 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AppData()), // Add your provider here
+        ChangeNotifierProvider(
+            create: (_) => AppData()), // Add your provider here
       ],
       child: const MyApp(), // Your main app widget
     ),

@@ -204,6 +204,7 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
   Future<void> Data() async {
     try {
       user = context.read<AppData>().user;
+      context.read<AppData>().user.doc = [];
       var inboxRef = db.collection("status");
 
       var query = inboxRef.where("receiver", isEqualTo: user.phone);
@@ -228,7 +229,7 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
               .toList();
         });
 
-        Get.to(const showallPage());
+        Get.to(const ShowAllPage());
       } else {
         setState(() {
           status = [];

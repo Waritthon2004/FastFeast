@@ -1,5 +1,7 @@
+import 'dart:async';
+import 'dart:math';
+import 'package:fast_feast/model/allproduct.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/model/product.dart';
 import 'package:fast_feast/page/bar.dart';
@@ -10,30 +12,33 @@ import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-class showallPage extends StatefulWidget {
-  const showallPage({super.key});
+class ShowAllPage extends StatefulWidget {
+  const ShowAllPage({super.key});
 
   @override
-  State<showallPage> createState() => _showallPageState();
+  State<ShowAllPage> createState() => _ShowAllPageState();
 }
 
-class _showallPageState extends State<showallPage> {
+class _ShowAllPageState extends State<ShowAllPage> {
   MapController mapController = MapController();
 
   late UserInfo user;
+  List<List<Allproduct>> allProductList = [];
+  List<Allproduct> allproduct = [];
+  List<Color> se = [];
 
   @override
   void initState() {
     super.initState();
-    user = context.read<AppData>().user;
+    loaddata();
   }
 
   LatLng latLng = const LatLng(16.246825669508297, 103.25199289277295);
-  late LatLng send;
-  late LatLng recvied;
   XFile? image;
-  @override
+
   var db = FirebaseFirestore.instance;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -61,14 +66,14 @@ class _showallPageState extends State<showallPage> {
         child: Column(
           children: [
             header(context),
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.8,
+              height: 400,
               child: FlutterMap(
                 mapController: mapController,
                 options: MapOptions(
                   initialCenter: latLng,
-                  initialZoom: 15.0,
+                  initialZoom: 12.0,
                 ),
                 children: [
                   TileLayer(
@@ -78,23 +83,87 @@ class _showallPageState extends State<showallPage> {
                     maxNativeZoom: 19,
                   ),
                   MarkerLayer(
-                    markers: [
-                      Marker(
-                          point: latLng,
-                          width: 40,
-                          height: 40,
-                          child: SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: Container(
-                              color: Colors.amber,
+                    markers: allProductList.expand((u) {
+                      Color markerColor = getRandomColor();
+                      se.add(markerColor);
+                      return u.expand((m) {
+                        return [
+                          Marker(
+                            point: LatLng(
+                              m.senderlocation.latitude,
+                              m.senderlocation.longitude,
+                            ),
+                            width: 10,
+                            height: 10,
+                            child: Icon(
+                              Icons.location_pin,
+                              color: markerColor,
+                              size: 30,
                             ),
                           ),
-                          alignment: Alignment.center),
-                    ],
+                          Marker(
+                            point: LatLng(
+                              m.receiverlocation.latitude,
+                              m.receiverlocation.longitude,
+                            ),
+                            width: 10,
+                            height: 10,
+                            child: Icon(
+                              Icons.inventory_2,
+                              color: markerColor,
+                              size: 30,
+                            ),
+                          ),
+                        ];
+                      }).toList();
+                    }).toList(),
                   ),
                 ],
               ),
+            ),
+            Column(
+              children: allProductList.expand((u) {
+                return u.asMap().entries.map((entry) {
+                  int index = entry.key;
+                  var m = entry.value;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Container(
+                      width: 300,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 60,
+                            child: Image.network(m.image),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("รายละเอียดสินค้า : ${m.description}"),
+                              Text("ผู้รับ : ${m.receiver}"),
+                              Text("ผู้ส่ง : ${m.sender}"),
+                              Icon(
+                                Icons.inventory_2,
+                                color: se[index],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList();
+              }).toList(),
             ),
           ],
         ),
@@ -133,6 +202,92 @@ class _showallPageState extends State<showallPage> {
       ),
     );
   }
+
+  Color getRandomColor() {
+    return Color((Random().nextDouble() * 0xFFFFFF).toInt() << 0)
+        .withOpacity(1.0);
+  }
+
+  Future<void> loaddata() async {
+    try {
+      user = context.read<AppData>().user;
+
+      for (var a in user.doc) {
+        var inboxRef = db.collection("status").doc(a);
+        var result = await inboxRef.get();
+
+        if (result.exists) {
+          setState(() {
+            try {
+              allproduct = [
+                Allproduct.fromJson(result.data() as Map<String, dynamic>)
+              ];
+              allProductList.add(allproduct);
+            } catch (e) {
+              print("Error parsing user data: $e");
+              allproduct = [];
+            }
+          });
+          print('Status found.');
+        } else {
+          setState(() {
+            allproduct = [];
+          });
+          print('No status found.');
+        }
+      }
+      realtime();
+    } catch (e) {
+      print("Error querying data: $e");
+    }
+  }
+
+  void realtime() {
+    user = context.read<AppData>().user;
+
+    // สร้าง List เก็บ StreamSubscription
+    List<StreamSubscription> listeners = [];
+    print("SSSAc");
+    for (var a in user.doc) {
+      final docRef = db.collection("status").doc(user.id);
+
+      // สร้าง listener และเก็บไว้ใน List
+      final subscription = docRef.snapshots().listen(
+        (event) {
+          print("SSSA");
+          allProductList = [];
+          var data = event.data();
+          if (data != null) {
+            try {
+              allproduct = [Allproduct.fromJson(data as Map<String, dynamic>)];
+              allProductList.add(allproduct);
+              setState(() {});
+            } catch (e) {
+              print("Error parsing status data: $e");
+            }
+          } else {
+            setState(() {
+              allproduct = [];
+            });
+            print('No status found.');
+          }
+        },
+        onError: (error) => print("Listen failed: $error"),
+      );
+
+      // เพิ่ม listener เข้าไปใน List
+      listeners.add(subscription);
+    }
+  }
+
+// // เมื่อต้องการยกเลิก listeners ทั้งหมด
+//   void cancelListeners() {
+//     final listeners = context.read<AppData>().listeners;
+//     for (var listener in listeners) {
+//       listener.cancel();
+//     }
+//     listeners.clear();
+//   }
 }
 
 class CustomStatusBar extends StatelessWidget {

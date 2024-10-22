@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 class AppData with ChangeNotifier {
   StreamSubscription? listener;
+
   UserInfo user = UserInfo();
 }
 

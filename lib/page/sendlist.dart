@@ -53,8 +53,8 @@ class _SendlistState extends State<Sendlist> {
                     Padding(
                       padding: const EdgeInsets.only(top: 10, bottom: 10),
                       child: FilledButton(
-                          onPressed: () {
-                            Get.to(const showallPage());
+                          onPressed: () async {
+                            await Data();
                           },
                           child: Text("ดูรายละเอียดทั้งหมด")),
                     )
@@ -190,6 +190,46 @@ class _SendlistState extends State<Sendlist> {
         });
         log('status found: ${status.length}');
         Get.to(const StatusPage());
+      } else {
+        setState(() {
+          status = [];
+        });
+        log('No status found.');
+      }
+    } catch (e) {
+      log("Error querying data: $e");
+    }
+  }
+
+  Future<void> Data() async {
+    try {
+      user = context.read<AppData>().user;
+      context.read<AppData>().user.doc = [];
+      var inboxRef = db.collection("status");
+
+      var query = inboxRef.where("sender", isEqualTo: user.phone);
+
+      var result = await query.get();
+
+      if (result.docs.isNotEmpty) {
+        setState(() {
+          status = result.docs
+              .map((doc) {
+                try {
+                  user.doc.add(doc.id);
+
+                  context.read<AppData>().user.id = user.id;
+                  return Status.fromJson(doc.data() as Map<String, dynamic>);
+                } catch (e) {
+                  log("Error parsing user data: $e");
+                  return null;
+                }
+              })
+              .whereType<Status>()
+              .toList();
+        });
+
+        Get.to(const ShowAllPage());
       } else {
         setState(() {
           status = [];
