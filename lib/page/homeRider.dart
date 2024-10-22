@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fast_feast/page/Bigmap.dart';
 import 'package:fast_feast/page/barRider.dart';
 import 'package:fast_feast/page/drawer.dart';
 import 'package:fast_feast/page/riderStatus.dart';
@@ -254,7 +255,7 @@ class DeliveryItemWidget extends StatelessWidget {
                           return;
                     }
                   } catch (e) {
-                    print('Error querying Firestore: $e');
+                    log('Error querying Firestore: $e');
                   }
                   Position position = await _determinePosition();
                   LatLng currentLocation =
@@ -273,7 +274,7 @@ class DeliveryItemWidget extends StatelessWidget {
                   } catch (e) {
                     log('Error updating document: $e');
                   }
-                  Get.to(const Riderstatus());
+                  Get.to(const Checkmap());
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 56, 104, 248),

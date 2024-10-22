@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fast_feast/page/Bigmap.dart';
 import 'package:fast_feast/page/home.dart';
 import 'package:fast_feast/page/login.dart';
 import 'package:fast_feast/page/process_send.dart';
@@ -64,6 +65,11 @@ class _linkState extends State<link> {
                 Get.to(const ProcessSendPage());
               },
               child: const Text("Process_Send")),
+          FilledButton(
+              onPressed: () {
+                Get.to(const Checkmap());
+              },
+              child: const Text("bigmap")),
           FilledButton(
               onPressed: () async {
                 try {

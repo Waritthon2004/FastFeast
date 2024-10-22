@@ -187,7 +187,16 @@ class _StatusPageState extends State<StatusPage> {
                   ),
                 if (u.status == 4 && user.role == 2)
                   FilledButton(
-                    onPressed: () {},
+                    onPressed: () async{
+                      await FirebaseFirestore.instance
+                        .collection('status')
+                        .doc('doc')
+                        .update({
+                      'status': 4,
+                     
+                     
+                    });
+                    },
                     child: const Text("รับสินค้า"),
                   )
                 else
@@ -207,7 +216,7 @@ class _StatusPageState extends State<StatusPage> {
       user = context.read<AppData>().user;
 
       var inboxRef = db.collection("status").doc(user.id);
-
+      log(inboxRef.id);
       var result = await inboxRef.get(); // Fetch a single document
 
       if (result.exists) {
