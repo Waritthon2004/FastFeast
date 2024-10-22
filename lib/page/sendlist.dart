@@ -136,7 +136,8 @@ class _SendlistState extends State<Sendlist> {
       user = context.read<AppData>().user;
       var inboxRef = db.collection("status");
 
-      var query = inboxRef.where("sender", isEqualTo: user.phone);
+      var query = inboxRef.where("sender", isEqualTo: user.phone).
+      where("status",isLessThan: 4);
 
       var result = await query.get();
 
