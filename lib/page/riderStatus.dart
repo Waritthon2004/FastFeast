@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/barRider.dart';
 import 'package:fast_feast/page/drawer.dart';
 import 'package:fast_feast/page/home.dart';
+import 'package:fast_feast/page/homeRider.dart';
 import 'package:fast_feast/shared/appData.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -287,7 +288,7 @@ class _RiderstatusState extends State<Riderstatus> {
             stopLocationUpdates();
               Get.snackbar('ส่งสินค้าเสร็จสิ้น', 'กลับไปหน้าแรก',
                           snackPosition: SnackPosition.TOP);
-            Get.to(const HomePage());
+            Get.to(const Homerider());
           }
 
           if (data['RiderLocation'] is GeoPoint) {
