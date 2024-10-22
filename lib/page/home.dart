@@ -55,56 +55,56 @@ class _HomePageState extends State<HomePage> {
         ),
         bottomNavigationBar: const Bar());
   }
-}
 
-Widget header(BuildContext context) {
-  return Container(
-    color: const Color(0xFF1ABBE0),
-    width: MediaQuery.of(context).size.width,
-    height: 150,
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
+  Widget header(BuildContext context) {
+    return Container(
+      color: const Color(0xFF1ABBE0),
+      width: MediaQuery.of(context).size.width,
+      height: 150,
       child: Padding(
-        padding: const EdgeInsets.only(left: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Hi Ruj", style: TextStyle(color: Colors.white)),
-            const Text("What are you looking for ?",
-                style: TextStyle(color: Colors.white)),
-            Padding(
-              padding: const EdgeInsets.only(top: 25),
-              child: Center(
-                child: Container(
-                    width: 300,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF5D939F),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Row(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: 20),
-                          child: Icon(
-                            Icons.location_on,
-                            color: Colors.white,
+        padding: const EdgeInsets.all(8.0),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Hi Ruj", style: TextStyle(color: Colors.white)),
+              const Text("What are you looking for ?",
+                  style: TextStyle(color: Colors.white)),
+              Padding(
+                padding: const EdgeInsets.only(top: 25),
+                child: Center(
+                  child: Container(
+                      width: 300,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF5D939F),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(left: 20),
+                            child: Icon(
+                              Icons.location_on,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 20),
-                          child: Text("Mahasarakham University",
-                              style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
-                    )),
-              ),
-            )
-          ],
+                          Padding(
+                            padding: EdgeInsets.only(left: 20),
+                            child: Text(user.address,
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      )),
+                ),
+              )
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 Widget body() {

@@ -247,12 +247,12 @@ class _ShowAllPageState extends State<ShowAllPage> {
 
     // Clear existing markers
     allProductList = [];
-    se = []; // Reset colors list
+    se = [];
 
     for (var a in user.doc) {
       final docRef = db.collection("status").doc(a);
 
-      docRef.snapshots().listen(
+      context.read<AppData>().listener2 = docRef.snapshots().listen(
         (event) {
           if (event.exists) {
             var data = event.data();
@@ -295,17 +295,6 @@ class _ShowAllPageState extends State<ShowAllPage> {
       );
     }
   }
-
-// Add this new method to update map bounds
-
-// // เมื่อต้องการยกเลิก listeners ทั้งหมด
-//   void cancelListeners() {
-//     final listeners = context.read<AppData>().listeners;
-//     for (var listener in listeners) {
-//       listener.cancel();
-//     }
-//     listeners.clear();
-//   }
 }
 
 class CustomStatusBar extends StatelessWidget {

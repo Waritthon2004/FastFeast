@@ -34,12 +34,13 @@ class _SenderPageState extends State<SenderPage> {
   late LatLng latLng;
   LatLng showw = LatLng(0, 0);
   List<User> users = [];
-  String stay = "Mahasarakham University";
+  late String stay;
   @override
   late UserInfo user;
   void initState() {
     super.initState();
     user = context.read<AppData>().user;
+    stay = user.address;
   }
 
   Widget build(BuildContext context) {
