@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/home.dart';
 import 'package:fast_feast/page/login.dart';
 import 'package:fast_feast/page/process_send.dart';
@@ -18,7 +21,7 @@ class link extends StatefulWidget {
 
 class _linkState extends State<link> {
   late UserInfo user;
-   @override
+  @override
   void initState() {
     super.initState();
     user = context.read<AppData>().user;
@@ -61,6 +64,31 @@ class _linkState extends State<link> {
                 Get.to(const ProcessSendPage());
               },
               child: const Text("Process_Send")),
+          FilledButton(
+              onPressed: () async {
+                try {
+                  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                      .collection('status')
+                      .where('rider', isEqualTo: "100")
+                      .where('status', isNotEqualTo: 3)
+                      .get();
+
+                  if (querySnapshot.docs.isNotEmpty) {
+                    for (var doc in querySnapshot.docs) {
+                      log('Document ID: ${doc.id}');
+                    }
+                    Get.snackbar('ผิดพลาด', 'คุณมีสินค้าต้องส่งอยู่เเล้ว',
+                        snackPosition: SnackPosition.TOP);
+                    return;
+                  }
+                  else{
+                    log("message");
+                  }
+                } catch (e) {
+                  log('Error querying Firestore: $e');
+                }
+              },
+              child: const Text("test")),
         ],
       ),
     );

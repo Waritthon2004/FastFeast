@@ -25,7 +25,9 @@ class _HomeriderState extends State<Homerider> {
   void initState() {
     super.initState();
     user = context.read<AppData>().user;
-    log("myname:$user.name");
+    log("myname:${user.name}");
+    log("myname:${user.phone}");
+  
     loadData = loadDataAsync();
   }
 
@@ -34,22 +36,7 @@ class _HomeriderState extends State<Homerider> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF1ABBE0),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: AssetImage('assets/image/default_profile.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ],
-        ),
+    
       ),
       drawer: const MyDrawer(),
       body: SingleChildScrollView(
@@ -84,9 +71,9 @@ class _HomeriderState extends State<Homerider> {
               color: Colors.white,
               shape: BoxShape.circle,
             ),
-            child: const CircleAvatar(
+            child: CircleAvatar(
               radius: 60,
-              backgroundImage: AssetImage('assets/image/ruj.jpg'),
+              backgroundImage: NetworkImage(user.image),
             ),
           ),
           const SizedBox(width: 9),
@@ -153,7 +140,7 @@ class _HomeriderState extends State<Homerider> {
                       origin: doc['origin'],
                       location: doc['destination'],
                       doc: doc.id,
-                      chk: user.docStatus,
+                 
                       phone: user.phone);
                 },
               );
@@ -169,18 +156,8 @@ class _HomeriderState extends State<Homerider> {
       Query<Map<String, dynamic>> collectionRef = FirebaseFirestore.instance
           .collection('status')
           .where('status', isEqualTo: 0);
-
       QuerySnapshot querySnapshot = await collectionRef.get();
 
-      // log("Number of documents: ${querySnapshot.docs.length}");
-
-      // for (var doc in querySnapshot.docs) {
-      //   log("Document ID: ${doc.id}");
-      //   log("Document data: ${doc.data()}");
-
-      //   // If you want to see specific fields:
-      //   // Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-      // }
 
       return querySnapshot;
     } catch (err) {
@@ -194,14 +171,12 @@ class DeliveryItemWidget extends StatelessWidget {
   final String origin;
   final String location;
   final String doc;
-  String chk;
   String phone;
   DeliveryItemWidget({
     super.key,
     required this.origin,
     required this.location,
     required this.doc,
-    required this.chk,
     required this.phone,
   });
 
@@ -270,6 +245,7 @@ class DeliveryItemWidget extends StatelessWidget {
                         .instance
                         .collection('status')
                         .where('rider', isEqualTo: phone)
+                        .where('status', isLessThan: 3)
                         .get();
 
                     if (querySnapshot.docs.isNotEmpty) {
@@ -294,9 +270,6 @@ class DeliveryItemWidget extends StatelessWidget {
                           currentLocation.latitude, currentLocation.longitude)
                     });
                     log('Document updated successfully');
-                    UserInfo info = UserInfo();
-                    info.docStatus = doc;
-                    context.read<AppData>().user = info;
                   } catch (e) {
                     log('Error updating document: $e');
                   }
