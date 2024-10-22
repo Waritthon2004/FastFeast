@@ -245,40 +245,58 @@ class _ShowAllPageState extends State<ShowAllPage> {
   void realtime() {
     user = context.read<AppData>().user;
 
-    // สร้าง List เก็บ StreamSubscription
-    List<StreamSubscription> listeners = [];
-    print("SSSAc");
-    for (var a in user.doc) {
-      final docRef = db.collection("status").doc(user.id);
+    // Clear existing markers
+    allProductList = [];
+    se = []; // Reset colors list
 
-      // สร้าง listener และเก็บไว้ใน List
-      final subscription = docRef.snapshots().listen(
+    for (var a in user.doc) {
+      final docRef = db.collection("status").doc(a);
+
+      docRef.snapshots().listen(
         (event) {
-          print("SSSA");
-          allProductList = [];
-          var data = event.data();
-          if (data != null) {
-            try {
-              allproduct = [Allproduct.fromJson(data as Map<String, dynamic>)];
-              allProductList.add(allproduct);
-              setState(() {});
-            } catch (e) {
-              print("Error parsing status data: $e");
+          if (event.exists) {
+            var data = event.data();
+            if (data != null) {
+              try {
+                setState(() {
+                  // Clear and update the specific product's data
+                  allproduct = [
+                    Allproduct.fromJson(data as Map<String, dynamic>)
+                  ];
+
+                  int existingIndex = allProductList.indexWhere((list) =>
+                      list.any((product) =>
+                          product.description == allproduct[0].description));
+
+                  if (existingIndex != -1) {
+                    allProductList[existingIndex] = allproduct;
+                  } else {
+                    allProductList.add(allproduct);
+                    // Add new color for new product
+                    se.add(getRandomColor());
+                  }
+
+                  // Update map center to show all markers
+                });
+              } catch (e) {
+                print("Error parsing status data: $e");
+              }
             }
           } else {
             setState(() {
-              allproduct = [];
+              // Remove product if document no longer exists
+              allProductList.removeWhere(
+                  (list) => list.any((product) => product.description == a));
             });
-            print('No status found.');
+            print('No status found for document: $a');
           }
         },
         onError: (error) => print("Listen failed: $error"),
       );
-
-      // เพิ่ม listener เข้าไปใน List
-      listeners.add(subscription);
     }
   }
+
+// Add this new method to update map bounds
 
 // // เมื่อต้องการยกเลิก listeners ทั้งหมด
 //   void cancelListeners() {
