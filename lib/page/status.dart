@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/model/product.dart';
 import 'package:fast_feast/model/rider.dart';
+
 import 'package:fast_feast/model/status.dart';
 import 'package:fast_feast/page/bar.dart';
 import 'package:fast_feast/page/drawer.dart';
@@ -23,7 +24,7 @@ class StatusPage extends StatefulWidget {
 class _StatusPageState extends State<StatusPage> {
   MapController mapController = MapController();
   List<Status> status = [];
-  List<Rider> rider = [];
+  List<UserModel> rider = [];
   List<Product> product = [];
   late UserInfo user;
 
@@ -235,7 +236,7 @@ class _StatusPageState extends State<StatusPage> {
 
   Future<void> queryUserData() async {
     try {
-      var riderRef = db.collection("rider");
+      var riderRef = db.collection("user");
       var query = riderRef.where("phone", isEqualTo: status[0].rider);
 
       var result = await query.get();
@@ -245,13 +246,13 @@ class _StatusPageState extends State<StatusPage> {
           rider = result.docs
               .map((doc) {
                 try {
-                  return Rider.fromJson(doc.data() as Map<String, dynamic>);
+                  return UserModel.fromJson(doc.data() as Map<String, dynamic>);
                 } catch (e) {
                   log("Error parsing rider data: $e");
                   return null;
                 }
               })
-              .whereType<Rider>()
+              .whereType<UserModel>()
               .toList();
         });
         log('Riders found: ${rider.length}');
@@ -397,7 +398,7 @@ class _StatusPageState extends State<StatusPage> {
                   Container(
                     width: 100,
                     height: 60,
-                    child: Image.network(r.images), // Image URL for rider
+                    child: Image.network(r.url), // Image URL for rider
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
