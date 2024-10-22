@@ -40,153 +40,156 @@ class _CheckmapState extends State<Checkmap> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // ใช้ FlutterMap เพื่อแทนที่ placeholder ของแผนที่
-          FlutterMap(
-            mapController: mapController,
-            options: const MapOptions(
-                    initialZoom: 15.0,
-                    initialCenter: LatLng(16.246825669508297, 103.25199289277295),
-                    maxZoom: 19.0,
-                  ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.app',
-              ),
-               MarkerLayer(
-                        markers: [
-                          // 1. Rider location marker
-                          Marker(
-                            point: riderLocation,
-                            width: 30,
-                            height: 30,
-                            child: const Icon(Icons.motorcycle_rounded,
-                                color: Color.fromARGB(255, 218, 193, 0),
-                                size: 30),
-                          ),
-                          // 2. Receiver location marker
-                          Marker(
-                            point: receiverLocation,
-                            width: 30,
-                            height: 30,
-                            child: const Icon(Icons.location_pin,
-                                color: Color.fromARGB(255, 33, 89, 243),
-                                size: 30),
-                          ),
-                          // 3. Conditionally add the sender location marker if status > 1
-                      
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // ใช้ FlutterMap เพื่อแทนที่ placeholder ของแผนที่
+            FlutterMap(
+              mapController: mapController,
+              options: const MapOptions(
+                      initialZoom: 15.0,
+                      initialCenter: LatLng(16.246825669508297, 103.25199289277295),
+                      maxZoom: 19.0,
+                    ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.app',
+                ),
+                 MarkerLayer(
+                          markers: [
+                            // 1. Rider location marker
                             Marker(
-                              point: senderLocation,
+                              point: riderLocation,
+                              width: 30,
+                              height: 30,
+                              child: const Icon(Icons.motorcycle_rounded,
+                                  color: Color.fromARGB(255, 218, 193, 0),
+                                  size: 30),
+                            ),
+                            // 2. Receiver location marker
+                            Marker(
+                              point: receiverLocation,
                               width: 30,
                               height: 30,
                               child: const Icon(Icons.location_pin,
-                                  color: Color.fromARGB(255, 206, 7, 4),
+                                  color: Color.fromARGB(255, 33, 89, 243),
                                   size: 30),
                             ),
+                            // 3. Conditionally add the sender location marker if status > 1
+                        
+                              Marker(
+                                point: senderLocation,
+                                width: 30,
+                                height: 30,
+                                child: const Icon(Icons.location_pin,
+                                    color: Color.fromARGB(255, 206, 7, 4),
+                                    size: 30),
+                              ),
+                          ],
+                        ),
+              ],
+            ),
+      
+            // Road numbers overlay
+            Positioned(
+              top: 100,
+              left: 20,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: const Text('227'),
+              ),
+            ),
+            Positioned(
+              top: 200,
+              left: 20,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: const Text('299'),
+              ),
+            ),
+      
+            // Delivery status card
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: Card(
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Delivery icon and text
+                      Row(
+                        children: [
+                          Icon(Icons.shopping_bag, color: Colors.grey),
+                          SizedBox(width: 8),
+                          Text(
+                            origin!,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                         ],
                       ),
-            ],
-          ),
-
-          // Road numbers overlay
-          Positioned(
-            top: 100,
-            left: 20,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: const Text('227'),
-            ),
-          ),
-          Positioned(
-            top: 200,
-            left: 20,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: const Text('299'),
-            ),
-          ),
-
-          // Delivery status card
-          Positioned(
-            bottom: 20,
-            left: 20,
-            right: 20,
-            child: Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Delivery icon and text
-                    Row(
-                      children: [
-                        Icon(Icons.shopping_bag, color: Colors.grey),
-                        SizedBox(width: 8),
-                        Text(
-                          origin!,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                       Padding(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: Container(
+                                      width:
+                                          1, // This controls the thickness of the vertical line
+                                      height:
+                                          50, // This controls the height of the line
+                                      color: Colors.grey, // Line color
+                                    ),
+                                  ),
+                       Row(
+                        children: [
+                          const Icon(Icons.location_on, color: Colors.blue, size: 20),
+                          const SizedBox(width: 8),
+                          Text(destination!),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Accept button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: (){
+                            Get.to(const Riderstatus());
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 103, 113, 249),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text(
+                            'รายละเอียดการส่งสินค้า',
+                            style: TextStyle(color: Colors.white,fontSize: 18),
                           ),
                         ),
-                      ],
-                    ),
-                     Padding(
-                                  padding: const EdgeInsets.only(left: 10),
-                                  child: Container(
-                                    width:
-                                        1, // This controls the thickness of the vertical line
-                                    height:
-                                        50, // This controls the height of the line
-                                    color: Colors.grey, // Line color
-                                  ),
-                                ),
-                     Row(
-                      children: [
-                        const Icon(Icons.location_on, color: Colors.blue, size: 20),
-                        const SizedBox(width: 8),
-                        Text(destination!),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    // Accept button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: (){
-                          Get.to(const Riderstatus());
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 103, 113, 249),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text(
-                          'รายละเอียดการส่งสินค้า',
-                          style: TextStyle(color: Colors.white,fontSize: 18),
-                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

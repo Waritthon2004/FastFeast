@@ -43,171 +43,172 @@ class _StatusPageState extends State<StatusPage> {
   @override
   var db = FirebaseFirestore.instance;
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1ABBE0),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: NetworkImage(
-                    user.image,
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF1ABBE0),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: NetworkImage(
+                      user.image,
+                    ),
+                    fit: BoxFit.cover,
                   ),
-                  fit: BoxFit.cover,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: status.map((u) {
-            return Column(
-              children: [
-                header(context),
-                const SizedBox(
-                  height: 20,
-                ),
-                CustomStatusBar(
-                  icons: const [
-                    Icons.hourglass_empty,
-                    Icons.phone_android,
-                    Icons.motorcycle,
-                    Icons.check_circle,
-                  ],
-                  currentStep: u.status!,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                SizedBox(
-                  width: 300,
-                  height: 300,
-                  child: FlutterMap(
-                    mapController: mapController,
-                    options: MapOptions(
-                      initialCenter: latLng,
-                      initialZoom: 12.0,
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.example.app',
-                        maxNativeZoom: 19,
-                      ),
-                      MarkerLayer(
-                        markers: [
-                          Marker(
-                            point: LatLng(
-                              u.receiverlocation!.latitude,
-                              u.receiverlocation!.longitude,
-                            ),
-                            width: 10,
-                            height: 10,
-                            child: const Icon(Icons.location_pin,
-                                color: Colors.red, size: 30),
-                          ),
-                          (u.status! > 0)
-                              ? Marker(
-                                  point: LatLng(
-                                    u.RiderLocation!.latitude,
-                                    u.RiderLocation!.longitude,
-                                  ),
-                                  width: 10,
-                                  height: 10,
-                                  child: const Icon(
-                                    Icons.motorcycle_rounded,
-                                    color: Color.fromARGB(255, 72, 16, 225),
-                                    size: 30,
-                                  ),
-                                )
-                              : Marker(
-                                  point: LatLng(
-                                    u.senderlocation!.latitude,
-                                    u.senderlocation!.longitude,
-                                  ),
-                                  width: 10,
-                                  height: 10,
-                                  child: const Icon(
-                                    Icons.location_pin,
-                                    color: Color.fromARGB(255, 72, 16, 225),
-                                    size: 30,
-                                  ),
-                                )
-                        ],
-                      ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: status.map((u) {
+              return Column(
+                children: [
+                  header(context),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  CustomStatusBar(
+                    icons: const [
+                      Icons.hourglass_empty,
+                      Icons.phone_android,
+                      Icons.motorcycle,
+                      Icons.check_circle,
                     ],
+                    currentStep: u.status!,
                   ),
-                ),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 10, left: 30),
-                    child: Text("สถานะการส่งของ"),
+                  const SizedBox(
+                    height: 20,
                   ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 10, left: 30),
-                    child: u.status == 0
-                        ? const Text("รอไรเดอร์มารับ")
-                        : u.status == 1
-                            ? const Text("ไรเดอร์มารับสินค้า")
-                            : u.status == 3
-                                ? const Text("ไรเดอร์กำลังมาส่งของ")
-                                : u.status == 4
-                                    ? const Text("ส่งของเสร็จสิ้น")
-                                    : const SizedBox(),
+                  SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: FlutterMap(
+                      mapController: mapController,
+                      options: MapOptions(
+                        initialCenter: latLng,
+                        initialZoom: 12.0,
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.example.app',
+                          maxNativeZoom: 19,
+                        ),
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: LatLng(
+                                u.receiverlocation!.latitude,
+                                u.receiverlocation!.longitude,
+                              ),
+                              width: 10,
+                              height: 10,
+                              child: const Icon(Icons.location_pin,
+                                  color: Colors.red, size: 30),
+                            ),
+                            (u.status! > 0)
+                                ? Marker(
+                                    point: LatLng(
+                                      u.RiderLocation!.latitude,
+                                      u.RiderLocation!.longitude,
+                                    ),
+                                    width: 10,
+                                    height: 10,
+                                    child: const Icon(
+                                      Icons.motorcycle_rounded,
+                                      color: Color.fromARGB(255, 72, 16, 225),
+                                      size: 30,
+                                    ),
+                                  )
+                                : Marker(
+                                    point: LatLng(
+                                      u.senderlocation!.latitude,
+                                      u.senderlocation!.longitude,
+                                    ),
+                                    width: 10,
+                                    height: 10,
+                                    child: const Icon(
+                                      Icons.location_pin,
+                                      color: Color.fromARGB(255, 72, 16, 225),
+                                      size: 30,
+                                    ),
+                                  )
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                if (u.status == 0)
-                  content()
-                else if (rider.isNotEmpty)
-                  content2()
-                else
-                  FutureBuilder(
-                    future: queryUserData(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState != ConnectionState.done) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else {
-                        return content2();
-                      }
-                    },
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 10, left: 30),
+                      child: Text("สถานะการส่งของ"),
+                    ),
                   ),
-                if (u.status == 4 && user.role == 2)
-                  FilledButton(
-                    onPressed: () async{
-                      await FirebaseFirestore.instance
-                        .collection('status')
-                        .doc('doc')
-                        .update({
-                      'status': 4,
-                     
-                     
-                    });
-                    },
-                    child: const Text("รับสินค้า"),
-                  )
-                else
-                  const SizedBox(),
-              ],
-            );
-          }).toList(),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10, left: 30),
+                      child: u.status == 0
+                          ? const Text("รอไรเดอร์มารับ")
+                          : u.status == 1
+                              ? const Text("ไรเดอร์มารับสินค้า")
+                              : u.status == 3
+                                  ? const Text("ไรเดอร์กำลังมาส่งของ")
+                                  : u.status == 4
+                                      ? const Text("ส่งของเสร็จสิ้น")
+                                      : const SizedBox(),
+                    ),
+                  ),
+                  if (u.status == 0)
+                    content()
+                  else if (rider.isNotEmpty)
+                    content2()
+                  else
+                    FutureBuilder(
+                      future: queryUserData(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState != ConnectionState.done) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else {
+                          return content2();
+                        }
+                      },
+                    ),
+                  if (u.status == 4 && user.role == 2)
+                    FilledButton(
+                      onPressed: () async {
+                        await FirebaseFirestore.instance
+                            .collection('status')
+                            .doc('doc')
+                            .update({
+                          'status': 4,
+                        });
+                      },
+                      child: const Text("รับสินค้า"),
+                    )
+                  else
+                    const SizedBox(),
+                ],
+              );
+            }).toList(),
+          ),
         ),
+        drawer: const MyDrawer(),
+        bottomNavigationBar: const Bar(),
       ),
-      drawer: const MyDrawer(),
-      bottomNavigationBar: const Bar(),
     );
   }
 

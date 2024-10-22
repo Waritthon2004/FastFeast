@@ -30,43 +30,46 @@ class _SendlistState extends State<Sendlist> {
   }
 
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1ABBE0),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            header(context),
-            Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Container(
-                width: 300,
-                decoration: BoxDecoration(
-                  color: Colors.white, // สีพื้นหลัง
-                  borderRadius: BorderRadius.circular(15), // ขอบโค้ง
-                ),
-                child: Column(
-                  children: [
-                    const Text("สินค้ากำลังไปส่ง"),
-                    content(),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10, bottom: 10),
-                      child: FilledButton(
-                          onPressed: () async {
-                            await Data();
-                          },
-                          child: Text("ดูรายละเอียดทั้งหมด")),
-                    )
-                  ],
-                ),
-              ),
-            )
-          ],
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF1ABBE0),
         ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              header(context),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Container(
+                  width: 300,
+                  decoration: BoxDecoration(
+                    color: Colors.white, // สีพื้นหลัง
+                    borderRadius: BorderRadius.circular(15), // ขอบโค้ง
+                  ),
+                  child: Column(
+                    children: [
+                      const Text("สินค้ากำลังไปส่ง"),
+                      content(),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 10),
+                        child: FilledButton(
+                            onPressed: () async {
+                              await Data();
+                            },
+                            child: Text("ดูรายละเอียดทั้งหมด")),
+                      )
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+        drawer: const MyDrawer(),
+        bottomNavigationBar: const Bar(),
       ),
-      drawer: const MyDrawer(),
-      bottomNavigationBar: const Bar(),
     );
   }
 

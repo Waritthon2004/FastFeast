@@ -25,35 +25,38 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF1ABBE0),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      user.image,
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF1ABBE0),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: NetworkImage(
+                        user.image,
+                      ),
+                      fit: BoxFit.cover,
                     ),
-                    fit: BoxFit.cover,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        drawer: const MyDrawer(),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [header(context), body()],
+          drawer: const MyDrawer(),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [header(context), body()],
+            ),
           ),
-        ),
-        bottomNavigationBar: const Bar());
+          bottomNavigationBar: const Bar()),
+    );
   }
 
   Widget header(BuildContext context) {

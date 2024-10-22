@@ -44,148 +44,151 @@ class _SenderPageState extends State<SenderPage> {
   }
 
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1ABBE0),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            CircleAvatar(
-              radius: 25,
-              backgroundImage: NetworkImage(
-                user.image,
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF1ABBE0),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              CircleAvatar(
+                radius: 25,
+                backgroundImage: NetworkImage(
+                  user.image,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      drawer: const MyDrawer(),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            header(context),
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Column(
-                children: [
-                  buildImageContainer(),
-                  buildTextField("รายละเอียดสินค้า", des),
-                  buildTextField("ผู้รับ", receiver),
-                  Container(
-                    width: 300,
-                    color: Colors.white,
-                    child: users.isNotEmpty
-                        ? Column(
-                            children: users.map((u) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white, // สีพื้นหลัง
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color:
-                                          Colors.grey.withOpacity(0.5), // สีเงา
-                                      spreadRadius:
-                                          0, // จำกัดเงาให้อยู่เฉพาะด้านล่าง
-                                      blurRadius: 7, // ระยะเบลอของเงา
-                                      offset: Offset(0,
-                                          5), // เลื่อนเงาเฉพาะด้านล่าง (y เป็นบวก)
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Container(
-                                            width: 50,
-                                            height: 50,
-                                            child: ClipOval(
-                                              child: Image.network(
-                                                "https://i.pinimg.com/enabled_lo/474x/1a/cd/ee/1acdeec352e027b19b1a1ec0e1c3e038.jpg",
-                                                fit: BoxFit.cover,
+        drawer: const MyDrawer(),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              header(context),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Column(
+                  children: [
+                    buildImageContainer(),
+                    buildTextField("รายละเอียดสินค้า", des),
+                    buildTextField("ผู้รับ", receiver),
+                    Container(
+                      width: 300,
+                      color: Colors.white,
+                      child: users.isNotEmpty
+                          ? Column(
+                              children: users.map((u) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white, // สีพื้นหลัง
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            Colors.grey.withOpacity(0.5), // สีเงา
+                                        spreadRadius:
+                                            0, // จำกัดเงาให้อยู่เฉพาะด้านล่าง
+                                        blurRadius: 7, // ระยะเบลอของเงา
+                                        offset: Offset(0,
+                                            5), // เลื่อนเงาเฉพาะด้านล่าง (y เป็นบวก)
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              child: ClipOval(
+                                                child: Image.network(
+                                                  "https://i.pinimg.com/enabled_lo/474x/1a/cd/ee/1acdeec352e027b19b1a1ec0e1c3e038.jpg",
+                                                  fit: BoxFit.cover,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          Container(
-                                            width: 60,
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(u.phone),
-                                                Text(u.name),
-                                                Row(children: [
-                                                  Icon(Icons.location_pin,
-                                                      color: Color.fromARGB(
-                                                          255, 36, 96, 200),
-                                                      size: 20),
-                                                  Text(u.address)
-                                                ])
-                                              ],
+                                            Container(
+                                              width: 60,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(u.phone),
+                                                  Text(u.name),
+                                                  Row(children: [
+                                                    Icon(Icons.location_pin,
+                                                        color: Color.fromARGB(
+                                                            255, 36, 96, 200),
+                                                        size: 20),
+                                                    Text(u.address)
+                                                  ])
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                          FilledButton(
-                                            onPressed: () async {
-                                              setState(() async {
-                                                receiver.text = u.phone;
-                                                phone = u.phone;
-                                                latLng = LatLng(
-                                                    u.location.latitude,
-                                                    u.location.longitude);
-                                                await queryDatafillter();
-                                                showw = latLng;
-                                                users = [];
-                                              });
-                                            },
-                                            style: ButtonStyle(
-                                              backgroundColor:
-                                                  WidgetStateProperty
-                                                      .all<Color>(Colors
-                                                          .blue), // กำหนดสีฟ้า
-                                            ),
-                                            child: Text("เลือก",
-                                                style: TextStyle(
-                                                    color: Colors
-                                                        .white)), // กำหนดข้อความเป็นสีขาว
-                                          )
-                                        ],
+                                            FilledButton(
+                                              onPressed: () async {
+                                                setState(() async {
+                                                  receiver.text = u.phone;
+                                                  phone = u.phone;
+                                                  latLng = LatLng(
+                                                      u.location.latitude,
+                                                      u.location.longitude);
+                                                  await queryDatafillter();
+                                                  showw = latLng;
+                                                  users = [];
+                                                });
+                                              },
+                                              style: ButtonStyle(
+                                                backgroundColor:
+                                                    WidgetStateProperty
+                                                        .all<Color>(Colors
+                                                            .blue), // กำหนดสีฟ้า
+                                              ),
+                                              child: Text("เลือก",
+                                                  style: TextStyle(
+                                                      color: Colors
+                                                          .white)), // กำหนดข้อความเป็นสีขาว
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          )
-                        : Container(),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        showw.latitude != 0
-                            ? FilledButton(
-                                onPressed: show,
-                                child: const Text("ตัวอย่างเส้นทาง"),
-                              )
-                            : SizedBox(),
-                        FilledButton(
-                          onPressed: save,
-                          child: const Text("บันทึก"),
-                        )
-                      ],
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            )
+                          : Container(),
                     ),
-                  ),
-                ],
-              ),
-            )
-          ],
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          showw.latitude != 0
+                              ? FilledButton(
+                                  onPressed: show,
+                                  child: const Text("ตัวอย่างเส้นทาง"),
+                                )
+                              : SizedBox(),
+                          FilledButton(
+                            onPressed: save,
+                            child: const Text("บันทึก"),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
+        bottomNavigationBar: const Bar(),
       ),
-      bottomNavigationBar: const Bar(),
     );
   }
 
