@@ -19,7 +19,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool isUserSelected = true; // By default, 'User' is selected
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: Scaffold(
         appBar: AppBar(),
         body: Padding(
