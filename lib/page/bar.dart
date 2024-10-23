@@ -1,4 +1,5 @@
 import 'package:fast_feast/page/home.dart';
+import 'package:fast_feast/page/process_send.dart';
 import 'package:fast_feast/page/sendlist.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -40,6 +41,7 @@ class Bar extends StatelessWidget {
         Get.to(const Sendlist());
         break;
       case 2:
+        Get.to(const ProcessSendPage());
         break;
     }
   }

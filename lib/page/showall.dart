@@ -69,7 +69,7 @@ class _ShowAllPageState extends State<ShowAllPage> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              header(context),
+              header(context), // Assuming this is your header widget
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: 400,
@@ -105,8 +105,8 @@ class _ShowAllPageState extends State<ShowAllPage> {
                                     ? m.riderLocation!.longitude
                                     : m.senderlocation!.longitude,
                               ),
-                              width: 10,
-                              height: 10,
+                              width: 30,
+                              height: 30,
                               child: Icon(
                                 m.status != 0
                                     ? Icons.motorcycle_rounded
@@ -120,8 +120,8 @@ class _ShowAllPageState extends State<ShowAllPage> {
                                 m.receiverlocation!.latitude,
                                 m.receiverlocation!.longitude,
                               ),
-                              width: 10,
-                              height: 10,
+                              width: 30,
+                              height: 30,
                               child: Icon(
                                 Icons.inventory_2,
                                 color: markerColor,
@@ -129,6 +129,32 @@ class _ShowAllPageState extends State<ShowAllPage> {
                               ),
                             ),
                           ];
+                        }).toList();
+                      }).toList(),
+                    ),
+                    PolylineLayer(
+                      polylines: allProductList.expand((u) {
+                        Color markerColor = getRandomColor();
+
+                        return u.map((m) {
+                          return Polyline(
+                            points: [
+                              LatLng(
+                                m.status != 0
+                                    ? m.riderLocation!.latitude
+                                    : m.senderlocation!.latitude,
+                                m.status != 0
+                                    ? m.riderLocation!.longitude
+                                    : m.senderlocation!.longitude,
+                              ),
+                              LatLng(
+                                m.receiverlocation!.latitude,
+                                m.receiverlocation!.longitude,
+                              ),
+                            ],
+                            strokeWidth: 3.0,
+                            color: markerColor,
+                          );
                         }).toList();
                       }).toList(),
                     ),

@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Hi Ruj", style: TextStyle(color: Colors.white)),
+              Text("Hi ${user.name}", style: TextStyle(color: Colors.white)),
               const Text("What are you looking for ?",
                   style: TextStyle(color: Colors.white)),
               Padding(

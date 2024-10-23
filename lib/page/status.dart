@@ -148,6 +148,29 @@ class _StatusPageState extends State<StatusPage> {
                                   )
                           ],
                         ),
+                        PolylineLayer(
+                          polylines: [
+                            Polyline(
+                              points: [
+                                LatLng(
+                                  u.receiverLocation!.latitude,
+                                  u.receiverLocation!.longitude,
+                                ),
+                                u.status! > 0
+                                    ? LatLng(
+                                        u.riderLocation!.latitude,
+                                        u.riderLocation!.longitude,
+                                      )
+                                    : LatLng(
+                                        u.senderLocation!.latitude,
+                                        u.senderLocation!.longitude,
+                                      )
+                              ],
+                              strokeWidth: 3.0,
+                              color: Colors.blue,
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -164,7 +187,7 @@ class _StatusPageState extends State<StatusPage> {
                       padding: const EdgeInsets.only(top: 10, left: 30),
                       child: u.status == 0
                           ? const Text("รอไรเดอร์มารับ")
-                          : u.status == 1
+                          : u.status == 2
                               ? const Text("ไรเดอร์มารับสินค้า")
                               : u.status == 3
                                   ? const Text("ไรเดอร์มาส่งของแล้ว")
@@ -173,8 +196,10 @@ class _StatusPageState extends State<StatusPage> {
                                       : const SizedBox(),
                     ),
                   ),
-                  if (u.status == 0 && user.role == 2)
+                  if (u.status == 0)
                     content()
+                  else if (u.status == 2 && user.role == 1)
+                    content4()
                   else if (rider.isNotEmpty && u.status != 3)
                     content2()
                   else if (rider.isNotEmpty && u.status == 3)
@@ -309,7 +334,7 @@ class _StatusPageState extends State<StatusPage> {
               .whereType<Product>()
               .toList();
         });
-        log('Riders found: ${product.length}');
+        log('Product found: ${product.length}');
       } else {
         setState(() {
           product = [];
@@ -360,6 +385,7 @@ class _StatusPageState extends State<StatusPage> {
     context.read<AppData>().listener = docRef.snapshots().listen(
       (event) {
         var data = event.data();
+        queryData();
         if (data != null) {
           try {
             Status statusData = Status.fromJson(data as Map<String, dynamic>);
@@ -384,14 +410,28 @@ class _StatusPageState extends State<StatusPage> {
 
   Widget content() {
     return Column(
-      children: product.map((p) {
+      children: status.map((p) {
         return Padding(
           padding: const EdgeInsets.only(top: 10),
           child: Container(
             width: 300,
             height: 300,
-            child: Image.network(
-                p.image), // Assuming r is a map containing 'image'
+            child: Image.network(p.image!),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget content4() {
+    return Column(
+      children: status.map((p) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Container(
+            width: 300,
+            height: 300,
+            child: Image.network(p.statusImage!),
           ),
         );
       }).toList(),
@@ -417,45 +457,15 @@ class _StatusPageState extends State<StatusPage> {
   Widget content2() {
     return Column(
       children: [
-        const Text("ไรเดอร์"),
+        const Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: EdgeInsets.only(top: 10, left: 30),
+            child: Text("ไรเดอร์"),
+          ),
+        ),
         // Iterate over rider list
         ...rider.map((r) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              width: 400,
-              height: 90,
-              decoration: BoxDecoration(
-                color: Colors.white, // สีพื้นหลัง
-                borderRadius: BorderRadius.circular(15), // ขอบโค้ง
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 60,
-                    child: Image.network(r.url), // Image URL for rider
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("ชื่อไรเดอร์ : ${r.name}"),
-                      Text("หมายเลขโทรศัพท์ : ${r.phone}"),
-                      Text("หมายเลขทะเบียน : ${r.license}"),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-
-        const Text("สินค้า"),
-
-        ...product.map((p) {
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
@@ -469,18 +479,83 @@ class _StatusPageState extends State<StatusPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 100,
-                    height: 60,
-                    child: Image.network(p.image), // Image URL for product
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Container(
+                      width: 70,
+                      height:
+                          70, // ใช้ขนาด width และ height ให้เป็นสี่เหลี่ยมจัตุรัสเพื่อให้วงกลมสมบูรณ์
+                      child: ClipOval(
+                        child: Image.network(
+                          r.url, // URL ของรูปภาพ
+                          fit: BoxFit.cover, // เพื่อให้รูปพอดีกับวงกลม
+                        ),
+                      ),
+                    ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 50),
+                    padding: const EdgeInsets.only(left: 40),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("ชื่อสินค้า : ${p.description}"),
+                        Text("ชื่อไรเดอร์ : ${r.name}"),
+                        Text("หมายเลขโทรศัพท์ : ${r.phone}"),
+                        Text("หมายเลขทะเบียน : ${r.license}"),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+
+        const Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: EdgeInsets.only(top: 10, left: 30),
+            child: Text("สินค้า"),
+          ),
+        ),
+
+        ...status.map((p) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              width: 400,
+              height: 90,
+              decoration: BoxDecoration(
+                color: Colors.white, // สีพื้นหลัง
+                borderRadius: BorderRadius.circular(15), // ขอบโค้ง
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Container(
+                      width: 70,
+                      height:
+                          70, // ใช้ขนาด width และ height ให้เป็นสี่เหลี่ยมจัตุรัสเพื่อให้วงกลมสมบูรณ์
+                      child: ClipOval(
+                        child: Image.network(
+                          p.image!, // URL ของรูปภาพ
+                          fit: BoxFit.cover, // เพื่อให้รูปพอดีกับวงกลม
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 40),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("ชื่อสินค้า : ${p.description!}"),
+                        Text("เบอร์ผู้ส่ง : ${p.sender!}"),
+                        Text("ที่อยู่ : ${p.origin!}"),
                       ],
                     ),
                   ),

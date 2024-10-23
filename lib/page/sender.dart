@@ -27,6 +27,7 @@ class _SenderPageState extends State<SenderPage> {
   final FirebaseStorage storage = FirebaseStorage.instance;
   final TextEditingController des = TextEditingController();
   final TextEditingController receiver = TextEditingController();
+  TextEditingController address = TextEditingController();
   final MapController mapController = MapController();
   FirebaseFirestore db = FirebaseFirestore.instance;
   String phone = "";
@@ -107,13 +108,13 @@ class _SenderPageState extends State<SenderPage> {
                                               height: 50,
                                               child: ClipOval(
                                                 child: Image.network(
-                                                  "https://i.pinimg.com/enabled_lo/474x/1a/cd/ee/1acdeec352e027b19b1a1ec0e1c3e038.jpg",
+                                                  u.url,
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),
                                             ),
                                             Container(
-                                              width: 60,
+                                              width: 90,
                                               child: Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
@@ -126,33 +127,36 @@ class _SenderPageState extends State<SenderPage> {
                                                             255, 36, 96, 200),
                                                         size: 20),
                                                     Text(u.address)
-                                                  ])
+                                                  ]),
                                                 ],
                                               ),
                                             ),
-                                            FilledButton(
-                                              onPressed: () async {
-                                                setState(() async {
-                                                  receiver.text = u.phone;
-                                                  phone = u.phone;
-                                                  latLng = LatLng(
-                                                      u.location.latitude,
-                                                      u.location.longitude);
-                                                  await queryDatafillter();
-                                                  showw = latLng;
-                                                  users = [];
-                                                });
-                                              },
-                                              style: ButtonStyle(
-                                                backgroundColor:
-                                                    WidgetStateProperty
-                                                        .all<Color>(Colors
-                                                            .blue), // กำหนดสีฟ้า
+                                            SizedBox(
+                                              width: 80,
+                                              child: FilledButton(
+                                                onPressed: () async {
+                                                  setState(() async {
+                                                    receiver.text = u.phone;
+                                                    phone = u.phone;
+                                                    latLng = LatLng(
+                                                        u.location.latitude,
+                                                        u.location.longitude);
+                                                    await queryDatafillter();
+                                                    showw = latLng;
+                                                    users = [];
+                                                  });
+                                                },
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      WidgetStateProperty
+                                                          .all<Color>(Colors
+                                                              .blue), // กำหนดสีฟ้า
+                                                ),
+                                                child: Text("เลือก",
+                                                    style: TextStyle(
+                                                        color: Colors
+                                                            .white)), // กำหนดข้อความเป็นสีขาว
                                               ),
-                                              child: Text("เลือก",
-                                                  style: TextStyle(
-                                                      color: Colors
-                                                          .white)), // กำหนดข้อความเป็นสีขาว
                                             )
                                           ],
                                         ),
@@ -376,6 +380,7 @@ class _SenderPageState extends State<SenderPage> {
   void _showLocationDialog() {
     Get.defaultDialog(
       title: 'Select your location',
+      backgroundColor: Colors.white,
       content: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return Column(
@@ -432,6 +437,39 @@ class _SenderPageState extends State<SenderPage> {
                       currentLocation, mapController.camera.zoom);
                 },
                 child: const Text('Get Current Location'),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 10, left: 30),
+                    child: Text("ชื่อที่อยู่"),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 200,
+                child: TextField(
+                  controller: address,
+                  decoration: InputDecoration(
+                    labelText: user.address, // Corrected label property
+                    border: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Color.fromARGB(255, 97, 217, 241), width: 1),
+                    ),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Color.fromARGB(255, 97, 217, 241), width: 1),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Color.fromARGB(255, 97, 217, 241), width: 1),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
               )
             ],
           );
@@ -441,7 +479,9 @@ class _SenderPageState extends State<SenderPage> {
         onPressed: () {
           Get.back(result: currentLocation);
           setState(() {
-            stay;
+            user.address = address.text;
+            user = context.read<AppData>().user;
+            stay = address.text;
           });
         },
         child: const Text('Confirm'),
@@ -495,6 +535,7 @@ class _SenderPageState extends State<SenderPage> {
       // ค้นหาชื่อที่มีส่วนคล้ายกันโดยเริ่มต้นด้วยค่าที่กรอก
       var query = inboxRef
           .where("phone", isGreaterThanOrEqualTo: receiver.text)
+          .where("phone", isNotEqualTo: user.phone)
           .where("phone", isLessThan: receiver.text + 'z');
 
       var result = await query.get();
@@ -564,7 +605,16 @@ class _SenderPageState extends State<SenderPage> {
                           child: const Icon(Icons.location_pin,
                               color: Color.fromARGB(255, 32, 55, 227),
                               size: 40),
-                        )
+                        ),
+                      ],
+                    ),
+                    PolylineLayer(
+                      polylines: [
+                        Polyline(
+                          points: [currentLocation, showw],
+                          strokeWidth: 3.0,
+                          color: Colors.blue,
+                        ),
                       ],
                     ),
                   ],

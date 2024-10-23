@@ -213,7 +213,7 @@ class _ProcessSendPageState extends State<ProcessSendPage> {
       var inboxRef = db.collection("status");
 
       var query = inboxRef
-          .where("sender", isEqualTo: user.phone)
+          .where("receiver", isEqualTo: user.phone)
           .where("status", isLessThan: 4);
 
       var result = await query.get();
