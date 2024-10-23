@@ -42,7 +42,78 @@ class BarRider extends StatelessWidget {
       Get.to(const Riderstatus());
         break;
       case 2:
-       Get.to(const Login());
+      Get.defaultDialog(
+        title: "",
+        content: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Text(
+                "ยืนยันออกจากระบบ?",
+                style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Cancel Button (Gray)
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey, // Background color
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // Rounded corners
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 25, vertical: 13), // Padding
+                    ),
+                    child: const Text(
+                      'ยกเลิก',
+                      style: TextStyle(
+                          color: Colors.white, // Text color
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  const SizedBox(width: 10), // Space between buttons
+
+                  // Yes Button (Green)
+                  ElevatedButton(
+                    onPressed: () {
+                   Get.to(const Login());
+                  
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 231, 17, 17), // Background color
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // Rounded corners
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 39, vertical: 13), // Padding
+                    ),
+                    child: const Text(
+                      'ใช่',
+                      style: TextStyle(
+                          color: Colors.white, // Text color
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    
         break;
      
     }

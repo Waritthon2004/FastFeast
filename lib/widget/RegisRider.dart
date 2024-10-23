@@ -212,48 +212,6 @@ class RegisRiderState extends State<RegisRider> {
     );
   }
 
-  void register() async {
-    log(passwdConfirmCTL.text);
-    if (nameCTL.text.isEmpty ||
-        passwdCTL.text.isEmpty ||
-        PhoneCTL.text.isEmpty ||
-        liscenseCTL.text.isEmpty ||
-        passwdConfirmCTL.text.isEmpty) {
-      log("กรอกไม่ครบครับ");
-      return;
-    }
-
-    try {
-      var db = FirebaseFirestore.instance;
-
-      // Check if a user with the same phone number already exists
-      var querySnapshot = await db
-          .collection('user')
-          .where('phone', isEqualTo: PhoneCTL.text)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        // Phone number already exists
-        log("หมายเลขโทรศัพท์นี้มีอยู่ในระบบแล้ว");
-        return;
-      }
-
-      // If no duplicate, proceed to add the new user
-      var data = {
-        'name': nameCTL.text,
-        'license': liscenseCTL.text,
-        'password': passwdCTL.text,
-        'phone': PhoneCTL.text,
-        'type': 2,
-        'createAt': DateTime.now()
-      };
-      db.collection('user').doc(PhoneCTL.text).set(data);
-      Get.to(const Login());
-    } catch (e) {
-      log(e.toString());
-    }
-  }
-
   void camera() async {
     final ImagePicker picker = ImagePicker();
     // Pick an image.
@@ -273,16 +231,9 @@ class RegisRiderState extends State<RegisRider> {
         PhoneCTL.text.isEmpty ||
         passwdConfirmCTL.text.isEmpty) {
       Get.snackbar('Error', 'Please fill in all fields',
-          snackPosition: SnackPosition.BOTTOM);
+          snackPosition: SnackPosition.TOP);
       return;
     }
-
-    if (passwdCTL.text != passwdConfirmCTL.text) {
-      Get.snackbar('Error', 'Passwords do not match',
-          snackPosition: SnackPosition.BOTTOM);
-      return;
-    }
-
     try {
       var db = FirebaseFirestore.instance;
       var querySnapshot = await db
@@ -292,7 +243,18 @@ class RegisRiderState extends State<RegisRider> {
 
       if (querySnapshot.docs.isNotEmpty) {
         Get.snackbar('Error', 'This phone number is already registered',
-            snackPosition: SnackPosition.BOTTOM);
+            snackPosition: SnackPosition.TOP);
+        return;
+      }
+      querySnapshot = await db
+          .collection('user')
+          .where('license', isEqualTo: liscenseCTL.text)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Phone number already exists
+         Get.snackbar('Error', 'This license is already use',
+                  snackPosition: SnackPosition.TOP);
         return;
       }
       String imageUrl = '';

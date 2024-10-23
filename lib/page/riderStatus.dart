@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/barRider.dart';
 import 'package:fast_feast/page/drawer.dart';
-import 'package:fast_feast/page/home.dart';
 import 'package:fast_feast/page/homeRider.dart';
 import 'package:fast_feast/shared/appData.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -12,12 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-// ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
-// ignore: depend_on_referenced_packages
-// import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 
 class Riderstatus extends StatefulWidget {
@@ -55,6 +50,7 @@ class _RiderstatusState extends State<Riderstatus> {
   LatLng receiverLocation = const LatLng(0, 0);
   LatLng senderLocation = const LatLng(0, 0);
   int checkEmpty = 0;
+  bool _isSaving = false;
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -62,51 +58,53 @@ class _RiderstatusState extends State<Riderstatus> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: const Color(0xFF1ABBE0),
-          // title: Text("z:${user.phone}"),
         ),
-        body: SingleChildScrollView(
-          child: Column(children: [
-            Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF1ABBE0),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20), // Bottom-left corner radius
-                  bottomRight:
-                      Radius.circular(20), // Bottom-right corner radius
-                ),
-              ),
-              width: MediaQuery.of(context).size.width,
-              height: 120,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 10),
-                      child: Text("ข้อมูลการจัดส่ง",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25,
-                              color: Colors.white)),
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1ABBE0),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(20),
+                        bottomRight: Radius.circular(20),
+                      ),
                     ),
-                    CustomStatusBar(
-                      icons: const [
-                        Icons.hourglass_empty,
-                        Icons.phone_android,
-                        Icons.motorcycle,
-                        Icons.check_circle,
-                      ],
-                      currentStep: status,
+                    width: MediaQuery.of(context).size.width,
+                    height: 120,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 10),
+                            child: Text(
+                              "ข้อมูลการจัดส่ง",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25,
+                                color: Colors.white
+                              )
+                            ),
+                          ),
+                          CustomStatusBar(
+                            icons: const [
+                              Icons.hourglass_empty,
+                              Icons.phone_android,
+                              Icons.motorcycle,
+                              Icons.check_circle,
+                            ],
+                            currentStep: status,
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            if (checkEmpty == 1) ...[
+                  ),
+                  const SizedBox(height: 20),
+                  if (checkEmpty == 1) ...[
               Column(
                 children: [
                   SizedBox(
@@ -225,27 +223,75 @@ class _RiderstatusState extends State<Riderstatus> {
                                   ),
                                 ],
                               ),
-                              ElevatedButton(
-                                onPressed: camera,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      const Color.fromARGB(255, 56, 104, 248),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 12),
-                                  minimumSize: const Size(80, 10),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        16), // Border radius of 10
-                                  ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 15),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: camera,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color.fromARGB(255, 56, 104, 248),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 12),
+                                        minimumSize: const Size(80, 10),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              16), // Border radius of 10
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'อัพเดตสถานะ',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            fontSize: 18),
+                                      ),
+                                    ),
+                                    TextButton(onPressed: ()async {
+                                                              var db = FirebaseFirestore.instance;
+                                    
+                                                              var querySnapshot =
+                                    await db.collection('status').doc(doc).get();
+                                                              var querySnapshot2 =
+                                    await db.collection('user').where('phone',isEqualTo: querySnapshot['sender']).get();
+                                                              var querySnapshot3 =
+                                    await db.collection('user').where('phone',isEqualTo: querySnapshot['receiver']).get();
+                                    
+                                                              Get.defaultDialog(
+                                                                title: "รายระเอียดงาน",titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                                                                content: Column(
+                                    crossAxisAlignment: CrossAxisAlignment
+                                        .start, // Align items to the start
+                                    children: [
+                                      Text("ชื่อผู้ส่ง: ${querySnapshot2.docs[0]['name']}"),
+                                      Text(
+                                          "สถานที่ผู้ส่ง: ${querySnapshot['origin']}"),
+                                      Text("เบอร์ผู้ส่ง: ${querySnapshot['sender']}"),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.symmetric(vertical: 10),
+                                        child: Container(
+                                          width:
+                                              200, 
+                                          height:
+                                              1, 
+                                          color: Colors.grey, 
+                                        ),
+                                      ),
+                                      Text("ชื่อผู้รับ:  ${querySnapshot3.docs[0]['name']}"),
+                                      Text(
+                                          "สถานที่ผู้รับ: ${querySnapshot['destination']}"),
+                                      Text(
+                                          "เบอร์ผู้รับ: ${querySnapshot['receiver']}"),
+                                    ],
+                                                                ),
+                                                              );
+                                                            }, child: Text("รายระเอียด")),
+                                  ],
                                 ),
-                                child: const Text(
-                                  'อัพเดตสถานะ',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      fontSize: 18),
-                                ),
-                              ),
+                              )
                             ],
                           ),
                         ),
@@ -256,22 +302,42 @@ class _RiderstatusState extends State<Riderstatus> {
                 ],
               )
             ],
-            if (checkEmpty == 0) ...[
-              const Column(
-                children: [
-                  Text("[คุณยังไม่มีสินค้าที่ต้องส่ง]",
-                      style: TextStyle(
-                          fontSize: 15, color: Color.fromARGB(255, 87, 71, 71)))
+
+                  if (checkEmpty == 0) ...[
+                    const Column(
+                      children: [
+                        Text(
+                          "[คุณยังไม่มีสินค้าที่ต้องส่ง]",
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Color.fromARGB(255, 87, 71, 71)
+                          )
+                        )
+                      ],
+                    )
+                  ]
                 ],
-              )
-            ]
-          ]),
+              ),
+            ),
+            // Loading overlay
+            if (_isSaving)
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                color: Colors.black54,
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              ),
+          ],
         ),
         drawer: const MyDrawer(),
         bottomNavigationBar: const BarRider(),
       ),
     );
-  }
+}
 
   void realtime() {
     try {
@@ -286,12 +352,12 @@ class _RiderstatusState extends State<Riderstatus> {
           setState(() {
             status = data['status'];
 
-            // Check if status is 3, and if so, stop location updates
             if (status == 3) {
               stopLocationUpdates();
-              Get.snackbar('ส่งสินค้าเสร็จสิ้น', 'กลับไปหน้าแรก',
-                  snackPosition: SnackPosition.TOP);
+              // Get.snackbar('ส่งสินค้าเสร็จสิ้น', 'กลับไปหน้าแรก',
+              //     snackPosition: SnackPosition.TOP);
               Get.to(const Homerider());
+              return;
             }
 
             if (data['RiderLocation'] is GeoPoint) {
@@ -336,8 +402,8 @@ class _RiderstatusState extends State<Riderstatus> {
             const Padding(
               padding: EdgeInsets.only(bottom: 10),
               child: Text(
-                "จัดส่งเรียบร้อยเเล้วใช่หรือไม่",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                "จัดส่งเรียบร้อยเเล้วกลับไปหน้าแรก",
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
             ),
             Padding(
@@ -441,50 +507,58 @@ class _RiderstatusState extends State<Riderstatus> {
   }
 
   void save() async {
-    log("${status.toString()}:xxxxStsatus");
-    var position = await _determinePosition();
-    LatLng currentLocation = LatLng(position.latitude, position.longitude);
-    mapController.move(latLng, mapController.camera.zoom);
-    setState(() {});
+    // Show loading state
+    setState(() {
+      _isSaving = true;
+    });
 
-    if (image != null) {
-      File file = File(image!.path);
-      String fileName = (file.path);
-      log('File name: $fileName');
+    try {
+      log("${status.toString()}:xxxxStsatus");
+      var position = await _determinePosition();
+      LatLng currentLocation = LatLng(position.latitude, position.longitude);
+      mapController.move(latLng, mapController.camera.zoom);
 
-      Reference firebaseStorageRef =
-          FirebaseStorage.instance.ref().child('uploads/$fileName');
-      UploadTask uploadTask = firebaseStorageRef.putFile(file);
+      if (image != null) {
+        File file = File(image!.path);
+        String fileName = (file.path);
+        log('File name: $fileName');
 
-      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {});
+        Reference firebaseStorageRef =
+            FirebaseStorage.instance.ref().child('uploads/$fileName');
+        UploadTask uploadTask = firebaseStorageRef.putFile(file);
 
-      await uploadTask.whenComplete(() async {
-        try {
-          String downloadURL = await firebaseStorageRef.getDownloadURL();
-          log('Download URL: $downloadURL');
-          var data = {
-            'status': status + 1,
-            'Statusimage': downloadURL,
-            'RiderLocation':
-                GeoPoint(currentLocation.latitude, currentLocation.longitude)
-          };
-          await FirebaseFirestore.instance
-              .collection('status')
-              .doc(doc)
-              .update(data);
-        } catch (error) {
-          log('Error getting download URL: $error');
-        }
+        uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {});
 
-        // setState(() {
-        //   status = status+1;
-        // });
-        // ignore: body_might_complete_normally_catch_error
-      }).catchError((error) {
-        log('Upload error: $error');
+        await uploadTask.whenComplete(() async {
+          try {
+            String downloadURL = await firebaseStorageRef.getDownloadURL();
+            log('Download URL: $downloadURL');
+            var data = {
+              'status': status + 1,
+              'Statusimage': downloadURL,
+              'RiderLocation':
+                  GeoPoint(currentLocation.latitude, currentLocation.longitude)
+            };
+            await FirebaseFirestore.instance
+                .collection('status')
+                .doc(doc)
+                .update(data);
+          } catch (error) {
+            log('Error getting download URL: $error');
+            throw error; // Re-throw to be caught by outer try-catch
+          }
+        });
+      } else {
+        log("No image selected.");
+      }
+    } catch (error) {
+      log('Error during save: $error');
+      // You might want to show an error message to the user here
+    } finally {
+      // Hide loading state
+      setState(() {
+        _isSaving = false;
       });
-    } else {
-      log("No image selected.");
     }
   }
 

@@ -3,16 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/Bigmap.dart';
 import 'package:fast_feast/page/barRider.dart';
 import 'package:fast_feast/page/drawer.dart';
-import 'package:fast_feast/page/riderStatus.dart';
 import 'package:fast_feast/shared/appData.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 
 class Homerider extends StatefulWidget {
-  const Homerider({Key? key}) : super(key: key);
+  const Homerider({super.key});
 
   @override
   State<Homerider> createState() => _HomeriderState();
@@ -135,7 +135,7 @@ class _HomeriderState extends State<Homerider> {
               }
               return ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
                   var doc = snapshot.data!.docs[index];
@@ -168,6 +168,7 @@ class _HomeriderState extends State<Homerider> {
   }
 }
 
+// ignore: must_be_immutable
 class DeliveryItemWidget extends StatelessWidget {
   final String origin;
   final String location;
@@ -181,6 +182,9 @@ class DeliveryItemWidget extends StatelessWidget {
     required this.phone,
   });
 
+  final MapController mapController = MapController();
+  LatLng showw = const LatLng(0, 0);
+  late LatLng currentLocation;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -194,7 +198,7 @@ class DeliveryItemWidget extends StatelessWidget {
               color: Colors.grey.withOpacity(0.3),
               spreadRadius: 2,
               blurRadius: 5,
-              offset: Offset(0, 3), // changes position of shadow
+              offset: const Offset(0, 3), // changes position of shadow
             ),
           ],
         ),
@@ -217,7 +221,6 @@ class DeliveryItemWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 3),
                   Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: Container(
@@ -227,7 +230,6 @@ class DeliveryItemWidget extends StatelessWidget {
                       color: Colors.grey, // Line color
                     ),
                   ),
-                  const SizedBox(height: 3),
                   Row(
                     children: [
                       const Icon(Icons.location_on, color: Colors.blue),
@@ -239,59 +241,116 @@ class DeliveryItemWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              ElevatedButton(
-                onPressed: () async {
-                  try {
-                    QuerySnapshot querySnapshot = await FirebaseFirestore
-                        .instance
-                        .collection('status')
-                        .where('rider', isEqualTo: phone)
-                        .where('status', isLessThan: 3)
-                        .get();
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          QuerySnapshot querySnapshot = await FirebaseFirestore
+                              .instance
+                              .collection('status')
+                              .where('rider', isEqualTo: phone)
+                              .where('status', isLessThan: 3)
+                              .get();
 
-                    if (querySnapshot.docs.isNotEmpty) {
-                      Get.snackbar('ผิดพลาด', 'คุณมีสินค้าต้องส่งอยู่เเล้ว',
-                          snackPosition: SnackPosition.TOP);
-                      return;
-                    }
-                  } catch (e) {
-                    log('Error querying Firestore: $e');
-                  }
-                  Position position = await _determinePosition();
-                  LatLng currentLocation =
-                      LatLng(position.latitude, position.longitude);
-                  try {
-                    await FirebaseFirestore.instance
-                        .collection('status')
-                        .doc(doc)
-                        .update({
-                      'status': 1,
-                      'rider': phone,
-                      'RiderLocation': GeoPoint(
-                          currentLocation.latitude, currentLocation.longitude)
-                    });
-                    log('Document updated successfully');
-                  } catch (e) {
-                    log('Error updating document: $e');
-                  }
-                  Get.to(const Checkmap());
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 56, 104, 248),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                  minimumSize: const Size(100, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(16), // Border radius of 10
-                  ),
-                ),
-                child: const Text(
-                  'รับงาน',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                          if (querySnapshot.docs.isNotEmpty) {
+                            Get.snackbar(
+                                'ผิดพลาด', 'คุณมีสินค้าต้องส่งอยู่เเล้ว',
+                                snackPosition: SnackPosition.TOP);
+                            return;
+                          }
+                        } catch (e) {
+                          log('Error querying Firestore: $e');
+                        }
+                        Position position = await _determinePosition();
+                        LatLng currentLocation =
+                            LatLng(position.latitude, position.longitude);
+                        try {
+                          await FirebaseFirestore.instance
+                              .collection('status')
+                              .doc(doc)
+                              .update({
+                            'status': 1,
+                            'rider': phone,
+                            'RiderLocation': GeoPoint(currentLocation.latitude,
+                                currentLocation.longitude)
+                          });
+                          log('Document updated successfully');
+                        } catch (e) {
+                          log('Error updating document: $e');
+                        }
+                        Get.to(const Checkmap());
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color.fromARGB(255, 56, 104, 248),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 12),
+                        minimumSize: const Size(100, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(16), // Border radius of 10
+                        ),
+                      ),
+                      child: const Text(
+                        'รับงาน',
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
+                    ),
+                    TextButton(
+                        onPressed: () async {
+                          var db = FirebaseFirestore.instance;
+
+                          var querySnapshot =
+                              await db.collection('status').doc(doc).get();
+                          var querySnapshot2 =
+                              await db.collection('user').where('phone',isEqualTo: querySnapshot['sender']).get();
+                          var querySnapshot3 =
+                              await db.collection('user').where('phone',isEqualTo: querySnapshot['receiver']).get();
+
+                          Get.defaultDialog(
+                            title: "รายระเอียดงาน",titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                            content: Column(
+                              crossAxisAlignment: CrossAxisAlignment
+                                  .start, // Align items to the start
+                              children: [
+                                Text("ชื่อผู้ส่ง: ${querySnapshot2.docs[0]['name']}"),
+                                Text(
+                                    "สถานที่ผู้ส่ง: ${querySnapshot['origin']}"),
+                                Text("เบอร์ผู้ส่ง: ${querySnapshot['sender']}"),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  child: Container(
+                                    width:
+                                        200, 
+                                    height:
+                                        1, 
+                                    color: Colors.grey, 
+                                  ),
+                                ),
+                                Text("ชื่อผู้รับ:  ${querySnapshot3.docs[0]['name']}"),
+                                Text(
+                                    "สถานที่ผู้รับ: ${querySnapshot['destination']}"),
+                                Text(
+                                    "เบอร์ผู้รับ: ${querySnapshot['receiver']}"),
+                              ],
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "รายระเอียด",
+                          style: TextStyle(fontSize: 13),
+                        ))
+                  ],
                 ),
               ),
             ],
