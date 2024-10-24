@@ -119,25 +119,25 @@ class RegisRiderState extends State<RegisRider> {
           ),
         ),
         SizedBox(height: 16.0),
-       TextFormField(
-  controller: PhoneCTL,
-  keyboardType: TextInputType.number,  // Displays numeric keyboard
-  inputFormatters: [
-    FilteringTextInputFormatter.digitsOnly,  // Allows only digits
-  ],
-  decoration: InputDecoration(
-    prefixIcon: Icon(Icons.phone),
-    labelText: 'Phone Number',
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(18),
-      borderSide: BorderSide(color: Colors.grey.shade300),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(18),
-      borderSide: BorderSide(color: Colors.grey.shade300),
-    ),
-  ),
-),
+        TextFormField(
+          controller: PhoneCTL,
+          keyboardType: TextInputType.number, // Displays numeric keyboard
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly, // Allows only digits
+          ],
+          decoration: InputDecoration(
+            prefixIcon: Icon(Icons.phone),
+            labelText: 'Phone Number',
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+          ),
+        ),
         const SizedBox(height: 16.0),
         TextFormField(
           controller: liscenseCTL,
@@ -258,8 +258,8 @@ class RegisRiderState extends State<RegisRider> {
 
       if (querySnapshot.docs.isNotEmpty) {
         // Phone number already exists
-         Get.snackbar('Error', 'This license is already use',
-                  snackPosition: SnackPosition.TOP);
+        Get.snackbar('Error', 'This license is already use',
+            snackPosition: SnackPosition.TOP);
         return;
       }
       String imageUrl = '';
