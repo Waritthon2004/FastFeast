@@ -352,6 +352,8 @@ class DeliveryItemWidget extends StatelessWidget {
                                     "สถานที่ผู้รับ: ${querySnapshot['destination']}"),
                                 Text(
                                     "เบอร์ผู้รับ: ${querySnapshot['receiver']}"),
+                                Text(
+                                    "เพิ่มเติม : ${querySnapshot['description']}"),
                               ],
                             ),
                           );
