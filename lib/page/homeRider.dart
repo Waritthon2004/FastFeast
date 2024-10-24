@@ -21,7 +21,7 @@ class Homerider extends StatefulWidget {
 class _HomeriderState extends State<Homerider> {
   late UserInfo user;
   late Future<QuerySnapshot> loadData;
-  int dist=0;
+  int dist = 0;
   @override
   void initState() {
     super.initState();
@@ -184,7 +184,7 @@ class DeliveryItemWidget extends StatelessWidget {
 
   final MapController mapController = MapController();
   LatLng showw = const LatLng(0, 0);
-  int dist=0;
+  int dist = 0;
   late LatLng currentLocation;
   @override
   Widget build(BuildContext context) {
@@ -266,10 +266,20 @@ class DeliveryItemWidget extends StatelessWidget {
                                 snackPosition: SnackPosition.TOP);
                             return;
                           }
+                          QuerySnapshot querySnapshot = await FirebaseFirestore
+                              .instance
+                              .collection('status')
+                              .where("rider", isEqualTo: phone)
+                              .where("status", isLessThan: 3)
+                              .get();
+
+                          if (querySnapshot.docs.isNotEmpty) {
+                                     Get.snackbar('ผิดพลาด', 'ไม่สามรถรับงานนี้ได้',
+                                snackPosition: SnackPosition.TOP);
+                          }
                           GeoPoint currentGeoPoint = GeoPoint(
                               currentLocation.latitude,
                               currentLocation.longitude);
-                      
                         } catch (e) {
                           log('Error querying Firestore: $e');
                         }
