@@ -19,7 +19,6 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   var PhoneCTL = TextEditingController();
   var passwdCTL = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,6 +127,7 @@ class _LoginState extends State<Login> {
         info.name = querySnapshot.docs[0]['name'];
         info.phone = querySnapshot.docs[0]['phone'];
         info.phone = querySnapshot.docs[0]['phone'];
+       
 
         // ignore: use_build_context_synchronously
         context.read<AppData>().user = info;
@@ -138,6 +138,7 @@ class _LoginState extends State<Login> {
           context.read<AppData>().user = info;
           Get.to(const HomePage());
         } else if (querySnapshot.docs[0]['type'] == 2) {
+          
           Get.to(const Homerider());
         }
       } else {
