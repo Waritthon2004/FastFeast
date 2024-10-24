@@ -276,6 +276,8 @@ class DeliveryItemWidget extends StatelessWidget {
                           if (querySnapshot.docs.isNotEmpty) {
                             Get.snackbar('ผิดพลาด', 'ไม่สามรถรับงานนี้ได้',
                                 snackPosition: SnackPosition.TOP);
+                                                            return;
+
                           }
                           GeoPoint currentGeoPoint = GeoPoint(
                               currentLocation.latitude,

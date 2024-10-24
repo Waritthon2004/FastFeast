@@ -400,12 +400,13 @@ class _RiderstatusState extends State<Riderstatus> {
   }
 
   void camera() async {
-    try {
-         DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
             .collection('status')
             .doc(doc)
             .get();
       int dist = 0;
+    try {
+       
       if (status == 1 ) {
         Position position = await _determinePosition();
         LatLng currentLocation = LatLng(position.latitude, position.longitude);
@@ -447,8 +448,14 @@ class _RiderstatusState extends State<Riderstatus> {
             return;
           }
         }
-        if(status == 2){
-
+   
+      }
+    } catch (e) {
+      log("message:$e");
+    }
+    try {
+         if(status == 2){
+        log("message");
         Position position = await _determinePosition();
         LatLng currentLocation = LatLng(position.latitude, position.longitude);
         GeoPoint currentGeoPoint =
@@ -490,9 +497,8 @@ class _RiderstatusState extends State<Riderstatus> {
           }
         }
       }
-      }
     } catch (e) {
-      log("message:$e");
+      
     }
     final ImagePicker picker = ImagePicker();
     image = await picker.pickImage(source: ImageSource.camera);
