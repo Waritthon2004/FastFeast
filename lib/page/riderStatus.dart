@@ -401,13 +401,12 @@ class _RiderstatusState extends State<Riderstatus> {
 
   void camera() async {
     try {
-      int dist = 0;
-      if (status == 1 || status == 2) {
-        DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+         DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
             .collection('status')
             .doc(doc)
             .get();
-
+      int dist = 0;
+      if (status == 1 ) {
         Position position = await _determinePosition();
         LatLng currentLocation = LatLng(position.latitude, position.longitude);
         GeoPoint currentGeoPoint =
@@ -448,6 +447,49 @@ class _RiderstatusState extends State<Riderstatus> {
             return;
           }
         }
+        else if(status == 2){
+
+        Position position = await _determinePosition();
+        LatLng currentLocation = LatLng(position.latitude, position.longitude);
+        GeoPoint currentGeoPoint =
+            GeoPoint(currentLocation.latitude, currentLocation.longitude);
+        LatLng senderLocation = const LatLng(0, 0);
+        List<dynamic> senderList = [];
+        double latitude = 0;
+        double longitude = 0;
+
+        if (documentSnapshot['receiverlocation'] is GeoPoint) {
+          GeoPoint senderGeo = documentSnapshot['receiverlocation'];
+          latitude = senderGeo.latitude;
+          longitude = senderGeo.longitude;
+          senderLocation = LatLng(latitude, longitude);
+        } else if (documentSnapshot['receiverlocation'] is List) {
+          senderList = documentSnapshot['receiverlocation'];
+          if (senderList.length >= 2) {
+            latitude = senderList[0];
+            longitude = senderList[1];
+            senderLocation = LatLng(latitude, longitude);
+          }
+        }
+
+// Calculate distance
+        if (latitude != 0 && longitude != 0) {
+          double distance = await Geolocator.distanceBetween(
+            currentLocation.latitude,
+            currentLocation.longitude,
+            latitude,
+            longitude,
+          );
+          // Use double.toString() to convert to String
+          log(distance.toString());
+          dist = distance.toInt();
+          if (distance > 20) {
+            Get.snackbar('คุณอยู่ห่างเกินไป', 'ไประยะห่างตอนนี้:$dist เมตร',
+                snackPosition: SnackPosition.TOP);
+            return;
+          }
+        }
+      }
       }
     } catch (e) {
       log("message:$e");
