@@ -483,7 +483,7 @@ class _RiderstatusState extends State<Riderstatus> {
   void startLocationUpdates() {
     try {
       locationUpdateTimer =
-          Timer.periodic(Duration(seconds: 3), (Timer t) async {
+          Timer.periodic(const Duration(seconds: 3), (Timer t) async {
         var position = await _determinePosition();
         LatLng currentLocation = LatLng(position.latitude, position.longitude);
         log("Current1 location: ${position.latitude}, ${position.longitude}");

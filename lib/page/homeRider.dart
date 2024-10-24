@@ -254,13 +254,15 @@ class DeliveryItemWidget extends StatelessWidget {
                           QuerySnapshot querySnapshot = await FirebaseFirestore
                               .instance
                               .collection('status')
-                              .where('rider', isEqualTo: phone)
+                              .where('rider',
+                                  isGreaterThanOrEqualTo:
+                                      '') // Checking if the field is non-empty
                               .where('status', isLessThan: 3)
                               .get();
 
                           if (querySnapshot.docs.isNotEmpty) {
                             Get.snackbar(
-                                'ผิดพลาด', 'คุณมีสินค้าต้องส่งอยู่เเล้ว',
+                                'ผิดพลาด', 'ไม่สามรถรับงานนี้ได้',
                                 snackPosition: SnackPosition.TOP);
                             return;
                           }
@@ -311,18 +313,27 @@ class DeliveryItemWidget extends StatelessWidget {
 
                           var querySnapshot =
                               await db.collection('status').doc(doc).get();
-                          var querySnapshot2 =
-                              await db.collection('user').where('phone',isEqualTo: querySnapshot['sender']).get();
-                          var querySnapshot3 =
-                              await db.collection('user').where('phone',isEqualTo: querySnapshot['receiver']).get();
+                          var querySnapshot2 = await db
+                              .collection('user')
+                              .where('phone',
+                                  isEqualTo: querySnapshot['sender'])
+                              .get();
+                          var querySnapshot3 = await db
+                              .collection('user')
+                              .where('phone',
+                                  isEqualTo: querySnapshot['receiver'])
+                              .get();
 
                           Get.defaultDialog(
-                            title: "รายระเอียดงาน",titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                            title: "รายระเอียดงาน",
+                            titleStyle:
+                                const TextStyle(fontWeight: FontWeight.bold),
                             content: Column(
                               crossAxisAlignment: CrossAxisAlignment
                                   .start, // Align items to the start
                               children: [
-                                Text("ชื่อผู้ส่ง: ${querySnapshot2.docs[0]['name']}"),
+                                Text(
+                                    "ชื่อผู้ส่ง: ${querySnapshot2.docs[0]['name']}"),
                                 Text(
                                     "สถานที่ผู้ส่ง: ${querySnapshot['origin']}"),
                                 Text("เบอร์ผู้ส่ง: ${querySnapshot['sender']}"),
@@ -330,14 +341,13 @@ class DeliveryItemWidget extends StatelessWidget {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 10),
                                   child: Container(
-                                    width:
-                                        200, 
-                                    height:
-                                        1, 
-                                    color: Colors.grey, 
+                                    width: 200,
+                                    height: 1,
+                                    color: Colors.grey,
                                   ),
                                 ),
-                                Text("ชื่อผู้รับ:  ${querySnapshot3.docs[0]['name']}"),
+                                Text(
+                                    "ชื่อผู้รับ:  ${querySnapshot3.docs[0]['name']}"),
                                 Text(
                                     "สถานที่ผู้รับ: ${querySnapshot['destination']}"),
                                 Text(
