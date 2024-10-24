@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_feast/page/login.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
@@ -118,21 +119,25 @@ class RegisRiderState extends State<RegisRider> {
           ),
         ),
         SizedBox(height: 16.0),
-        TextFormField(
-          controller: PhoneCTL,
-          decoration: InputDecoration(
-            prefixIcon: Icon(Icons.phone),
-            labelText: 'Phone Number',
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-          ),
-        ),
+       TextFormField(
+  controller: PhoneCTL,
+  keyboardType: TextInputType.number,  // Displays numeric keyboard
+  inputFormatters: [
+    FilteringTextInputFormatter.digitsOnly,  // Allows only digits
+  ],
+  decoration: InputDecoration(
+    prefixIcon: Icon(Icons.phone),
+    labelText: 'Phone Number',
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+  ),
+),
         const SizedBox(height: 16.0),
         TextFormField(
           controller: liscenseCTL,
