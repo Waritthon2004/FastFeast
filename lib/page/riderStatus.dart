@@ -447,12 +447,12 @@ class _RiderstatusState extends State<Riderstatus> {
             return;
           }
         }
-        else if(status == 2){
+        if(status == 2){
 
         Position position = await _determinePosition();
         LatLng currentLocation = LatLng(position.latitude, position.longitude);
         GeoPoint currentGeoPoint =
-            GeoPoint(currentLocation.latitude, currentLocation.longitude);
+        GeoPoint(currentLocation.latitude, currentLocation.longitude);
         LatLng senderLocation = const LatLng(0, 0);
         List<dynamic> senderList = [];
         double latitude = 0;
