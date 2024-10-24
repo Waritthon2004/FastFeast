@@ -192,9 +192,23 @@ class _ShowAllPageState extends State<ShowAllPage> {
                                 Text("รายละเอียดสินค้า : ${m.description}"),
                                 Text("ผู้รับ : ${m.receiver}"),
                                 Text("ผู้ส่ง : ${m.sender}"),
-                                Icon(
-                                  Icons.inventory_2,
-                                  color: productColor, // Use the mapped color
+                                Row(
+                                  children: [
+                                    Icon(
+                                      m.status != 0
+                                          ? Icons.motorcycle_rounded
+                                          : Icons.location_pin,
+                                      color: productColor,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 5),
+                                      child: Icon(
+                                        Icons.inventory_2,
+                                        color:
+                                            productColor, // Use the mapped color
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),

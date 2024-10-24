@@ -1,4 +1,6 @@
+import 'package:fast_feast/page/home.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({
@@ -14,24 +16,17 @@ class MyDrawer extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Image.network(
-              'https://static.wikia.nocookie.net/leagueoflegends/images/5/53/Riot_Games_logo_icon.png/revision/latest/scale-to-width-down/250?cb=20230217151156&path-prefix=th',
+            child: Image.asset(
+              'assets/image/luffy.jpg',
               width: 100,
             ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text("Main Menu"),
           ),
           ListTile(
             title: const Text("Home"),
             leading: const Icon(Icons.home),
-            onTap: () {},
-          ),
-          ListTile(
-            title: const Text("Setting"),
-            leading: const Icon(Icons.settings),
-            onTap: () {},
+            onTap: () {
+              Get.to(const HomePage());
+            },
           ),
           const Divider(
             indent: 30,
@@ -47,7 +42,7 @@ class MyDrawer extends StatelessWidget {
           Expanded(child: Container()),
           const Padding(
             padding: EdgeInsets.only(bottom: 20),
-            child: Text("Waritton @ 65011212075"),
+            child: Text("65011212075 @ 65011212048"),
           )
         ],
       ),

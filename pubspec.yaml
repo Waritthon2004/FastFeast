@@ -50,7 +50,9 @@ dependencies:
   geolocator_android: 4.5.5
   provider: ^6.1.2
   latlong2: ^0.9.0
-  
+
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -81,6 +83,7 @@ flutter:
     - assets/image/give.png
     - assets/image/login.png
     - assets/image/ruj.jpg
+    - assets/image/luffy.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -21,7 +21,7 @@ class Homerider extends StatefulWidget {
 class _HomeriderState extends State<Homerider> {
   late UserInfo user;
   late Future<QuerySnapshot> loadData;
-
+  int dist = 0;
   @override
   void initState() {
     super.initState();
@@ -184,6 +184,7 @@ class DeliveryItemWidget extends StatelessWidget {
 
   final MapController mapController = MapController();
   LatLng showw = const LatLng(0, 0);
+  int dist = 0;
   late LatLng currentLocation;
   @override
   Widget build(BuildContext context) {
@@ -250,26 +251,39 @@ class DeliveryItemWidget extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                        try {
-                          QuerySnapshot querySnapshot = await FirebaseFirestore
-                              .instance
-                              .collection('status')
-                              .where('rider', isEqualTo: phone)
-                              .where('status', isLessThan: 3)
-                              .get();
-
-                          if (querySnapshot.docs.isNotEmpty) {
-                            Get.snackbar(
-                                'ผิดพลาด', 'คุณมีสินค้าต้องส่งอยู่เเล้ว',
-                                snackPosition: SnackPosition.TOP);
-                            return;
-                          }
-                        } catch (e) {
-                          log('Error querying Firestore: $e');
-                        }
                         Position position = await _determinePosition();
                         LatLng currentLocation =
                             LatLng(position.latitude, position.longitude);
+                        try {
+                          DocumentSnapshot documentSnapshot =
+                              await FirebaseFirestore.instance
+                                  .collection('status')
+                                  .doc(doc)
+                                  .get();
+
+                          if (documentSnapshot['status'] != 0) {
+                            Get.snackbar('ผิดพลาด', 'ไม่สามรถรับงานนี้ได้',
+                                snackPosition: SnackPosition.TOP);
+                            return;
+                          }
+                          QuerySnapshot querySnapshot = await FirebaseFirestore
+                              .instance
+                              .collection('status')
+                              .where("rider", isEqualTo: phone)
+                              .where("status", isLessThan: 3)
+                              .get();
+
+                          if (querySnapshot.docs.isNotEmpty) {
+                            Get.snackbar('ผิดพลาด', 'ไม่สามรถรับงานนี้ได้',
+                                snackPosition: SnackPosition.TOP);
+                          }
+                          GeoPoint currentGeoPoint = GeoPoint(
+                              currentLocation.latitude,
+                              currentLocation.longitude);
+                        } catch (e) {
+                          log('Error querying Firestore: $e');
+                        }
+
                         try {
                           await FirebaseFirestore.instance
                               .collection('status')
@@ -311,18 +325,27 @@ class DeliveryItemWidget extends StatelessWidget {
 
                           var querySnapshot =
                               await db.collection('status').doc(doc).get();
-                          var querySnapshot2 =
-                              await db.collection('user').where('phone',isEqualTo: querySnapshot['sender']).get();
-                          var querySnapshot3 =
-                              await db.collection('user').where('phone',isEqualTo: querySnapshot['receiver']).get();
+                          var querySnapshot2 = await db
+                              .collection('user')
+                              .where('phone',
+                                  isEqualTo: querySnapshot['sender'])
+                              .get();
+                          var querySnapshot3 = await db
+                              .collection('user')
+                              .where('phone',
+                                  isEqualTo: querySnapshot['receiver'])
+                              .get();
 
                           Get.defaultDialog(
-                            title: "รายระเอียดงาน",titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                            title: "รายระเอียดงาน",
+                            titleStyle:
+                                const TextStyle(fontWeight: FontWeight.bold),
                             content: Column(
                               crossAxisAlignment: CrossAxisAlignment
                                   .start, // Align items to the start
                               children: [
-                                Text("ชื่อผู้ส่ง: ${querySnapshot2.docs[0]['name']}"),
+                                Text(
+                                    "ชื่อผู้ส่ง: ${querySnapshot2.docs[0]['name']}"),
                                 Text(
                                     "สถานที่ผู้ส่ง: ${querySnapshot['origin']}"),
                                 Text("เบอร์ผู้ส่ง: ${querySnapshot['sender']}"),
@@ -330,18 +353,19 @@ class DeliveryItemWidget extends StatelessWidget {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 10),
                                   child: Container(
-                                    width:
-                                        200, 
-                                    height:
-                                        1, 
-                                    color: Colors.grey, 
+                                    width: 200,
+                                    height: 1,
+                                    color: Colors.grey,
                                   ),
                                 ),
-                                Text("ชื่อผู้รับ:  ${querySnapshot3.docs[0]['name']}"),
+                                Text(
+                                    "ชื่อผู้รับ:  ${querySnapshot3.docs[0]['name']}"),
                                 Text(
                                     "สถานที่ผู้รับ: ${querySnapshot['destination']}"),
                                 Text(
                                     "เบอร์ผู้รับ: ${querySnapshot['receiver']}"),
+                                Text(
+                                    "เพิ่มเติม : ${querySnapshot['description']}"),
                               ],
                             ),
                           );

@@ -33,8 +33,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   children: [
                     const Text(
                       'Let\'s Create Your Account',
-                      style:
-                          TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 24.0, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8.0),
                     const Text('Select Account Type'),
@@ -153,7 +153,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     )
                   ],
                 ),
-      
+
                 const SizedBox(height: 16.0),
                 // Input Fields
                 widgetField,

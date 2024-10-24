@@ -31,11 +31,13 @@ class _SenderPageState extends State<SenderPage> {
   final MapController mapController = MapController();
   FirebaseFirestore db = FirebaseFirestore.instance;
   String phone = "";
+  String dest = "";
   late LatLng currentLocation;
   late LatLng latLng;
   LatLng showw = LatLng(0, 0);
   List<User> users = [];
   late String stay;
+
   @override
   late UserInfo user;
   void initState() {
@@ -138,6 +140,7 @@ class _SenderPageState extends State<SenderPage> {
                                                   setState(() async {
                                                     receiver.text = u.phone;
                                                     phone = u.phone;
+                                                    dest = u.address;
                                                     latLng = LatLng(
                                                         u.location.latitude,
                                                         u.location.longitude);
@@ -216,7 +219,7 @@ class _SenderPageState extends State<SenderPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 10, left: 30),
+          padding: const EdgeInsets.only(top: 10, left: 5),
           child: Text(label),
         ),
         Padding(
@@ -279,6 +282,21 @@ class _SenderPageState extends State<SenderPage> {
       Get.snackbar('Error', 'Please select an image');
       return;
     }
+    if (des.text == "") {
+      Get.snackbar('Error', 'Please Enter description');
+      return;
+    }
+    if (phone == "") {
+      Get.snackbar('Error', 'Please Enter phone');
+      return;
+    }
+
+    Get.dialog(
+      const Center(
+        child: CircularProgressIndicator(),
+      ),
+      barrierDismissible: false,
+    );
 
     try {
       File file = File(image!.path);
@@ -300,7 +318,7 @@ class _SenderPageState extends State<SenderPage> {
 
       await db.collection('status').doc().set({
         'origin': user.address,
-        'destination': "MSU",
+        'destination': dest,
         'receiver': phone,
         'description': des.text,
         'image': downloadURL,
@@ -311,9 +329,15 @@ class _SenderPageState extends State<SenderPage> {
         'status': 0
       });
 
+      // Dismiss the loader
+      Get.back();
+
       Get.snackbar('Success', 'Image uploaded and data saved');
       clearFields();
     } catch (error) {
+      // Dismiss the loader in case of error
+      Get.back();
+
       Get.snackbar('Error', 'Failed to upload image and save data: $error');
     }
   }
