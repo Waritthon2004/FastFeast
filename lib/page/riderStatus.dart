@@ -81,14 +81,11 @@ class _RiderstatusState extends State<Riderstatus> {
                         children: [
                           const Padding(
                             padding: EdgeInsets.only(bottom: 10),
-                            child: Text(
-                              "ข้อมูลการจัดส่ง",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 25,
-                                color: Colors.white
-                              )
-                            ),
+                            child: Text("ข้อมูลการจัดส่ง",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 25,
+                                    color: Colors.white)),
                           ),
                           CustomStatusBar(
                             icons: const [
@@ -105,214 +102,241 @@ class _RiderstatusState extends State<Riderstatus> {
                   ),
                   const SizedBox(height: 20),
                   if (checkEmpty == 1) ...[
-              Column(
-                children: [
-                  SizedBox(
-                    width: 340,
-                    height: 340,
-                    child: FlutterMap(
-                      mapController: mapController,
-                      options: MapOptions(
-                        initialCenter:
-                            riderLocation, // Use a default center for the map
-                        initialZoom: 1,
-                      ),
+                    Column(
                       children: [
-                        TileLayer(
-                          urlTemplate:
-                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                          userAgentPackageName: 'com.example.app',
-                          maxNativeZoom: 19,
-                        ),
-                        MarkerLayer(
-                          markers: [
-                            // 1. Rider location marker
-                            Marker(
-                              point: riderLocation,
-                              width: 30,
-                              height: 30,
-                              child: const Icon(Icons.motorcycle_rounded,
-                                  color: Color.fromARGB(255, 218, 193, 0),
-                                  size: 30),
+                        SizedBox(
+                          width: 340,
+                          height: 340,
+                          child: FlutterMap(
+                            mapController: mapController,
+                            options: MapOptions(
+                              initialCenter:
+                                  riderLocation, // Use a default center for the map
+                              initialZoom: 1,
                             ),
-                            // 2. Receiver location marker
-                            Marker(
-                              point: receiverLocation,
-                              width: 30,
-                              height: 30,
-                              child: const Icon(Icons.location_pin,
-                                  color: Color.fromARGB(255, 33, 89, 243),
-                                  size: 30),
-                            ),
-                            // 3. Conditionally add the sender location marker if status > 1
-                            if (status <= 1)
-                              Marker(
-                                point: senderLocation,
-                                width: 30,
-                                height: 30,
-                                child: const Icon(Icons.location_pin,
-                                    color: Color.fromARGB(255, 206, 7, 4),
-                                    size: 30),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: Container(
-                        width: 340,
-                        height: 155,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(
-                                  0, 3), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.local_shipping,
-                                          color: Colors.orange),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        origin!,
-                                        style: const TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
+                              TileLayer(
+                                urlTemplate:
+                                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                userAgentPackageName: 'com.example.app',
+                                maxNativeZoom: 19,
+                              ),
+                              MarkerLayer(
+                                markers: [
+                                  // 1. Rider location marker
+                                  Marker(
+                                    point: riderLocation,
+                                    width: 30,
+                                    height: 30,
+                                    child: const Icon(Icons.motorcycle_rounded,
+                                        color: Color.fromARGB(255, 218, 193, 0),
+                                        size: 30),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Container(
-                                      width:
-                                          1, // This controls the thickness of the vertical line
-                                      height:
-                                          50, // This controls the height of the line
-                                      color: Colors.grey, // Line color
+                                  // 2. Receiver location marker
+                                  Marker(
+                                    point: receiverLocation,
+                                    width: 30,
+                                    height: 30,
+                                    child: const Icon(Icons.location_pin,
+                                        color: Color.fromARGB(255, 33, 89, 243),
+                                        size: 30),
+                                  ),
+                                  // 3. Conditionally add the sender location marker if status > 1
+                                  if (status <= 1)
+                                    Marker(
+                                      point: senderLocation,
+                                      width: 30,
+                                      height: 30,
+                                      child: const Icon(Icons.location_pin,
+                                          color: Color.fromARGB(255, 206, 7, 4),
+                                          size: 30),
                                     ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on,
-                                          color: Colors.blue),
-                                      const SizedBox(width: 8),
-                                      Text(destination!,
-                                          style: const TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
                                 ],
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 15),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: camera,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            const Color.fromARGB(255, 56, 104, 248),
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 20, vertical: 12),
-                                        minimumSize: const Size(80, 10),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              16), // Border radius of 10
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'อัพเดตสถานะ',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                            fontSize: 18),
-                                      ),
-                                    ),
-                                    TextButton(onPressed: ()async {
-                                                              var db = FirebaseFirestore.instance;
-                                    
-                                                              var querySnapshot =
-                                    await db.collection('status').doc(doc).get();
-                                                              var querySnapshot2 =
-                                    await db.collection('user').where('phone',isEqualTo: querySnapshot['sender']).get();
-                                                              var querySnapshot3 =
-                                    await db.collection('user').where('phone',isEqualTo: querySnapshot['receiver']).get();
-                                    
-                                                              Get.defaultDialog(
-                                                                title: "รายระเอียดงาน",titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-                                                                content: Column(
-                                    crossAxisAlignment: CrossAxisAlignment
-                                        .start, // Align items to the start
-                                    children: [
-                                      Text("ชื่อผู้ส่ง: ${querySnapshot2.docs[0]['name']}"),
-                                      Text(
-                                          "สถานที่ผู้ส่ง: ${querySnapshot['origin']}"),
-                                      Text("เบอร์ผู้ส่ง: ${querySnapshot['sender']}"),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.symmetric(vertical: 10),
-                                        child: Container(
-                                          width:
-                                              200, 
-                                          height:
-                                              1, 
-                                          color: Colors.grey, 
-                                        ),
-                                      ),
-                                      Text("ชื่อผู้รับ:  ${querySnapshot3.docs[0]['name']}"),
-                                      Text(
-                                          "สถานที่ผู้รับ: ${querySnapshot['destination']}"),
-                                      Text(
-                                          "เบอร์ผู้รับ: ${querySnapshot['receiver']}"),
-                                    ],
-                                                                ),
-                                                              );
-                                                            }, child: Text("รายระเอียด")),
-                                  ],
-                                ),
-                              )
                             ],
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                  // TextButton(onPressed: dispose, child: const Text("xx")),
-                ],
-              )
-            ],
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: Container(
+                              width: 340,
+                              height: 155,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: const Offset(
+                                        0, 3), // changes position of shadow
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.local_shipping,
+                                                color: Colors.orange),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              origin!,
+                                              style: const TextStyle(
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 10),
+                                          child: Container(
+                                            width:
+                                                1, // This controls the thickness of the vertical line
+                                            height:
+                                                50, // This controls the height of the line
+                                            color: Colors.grey, // Line color
+                                          ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.location_on,
+                                                color: Colors.blue),
+                                            const SizedBox(width: 8),
+                                            Text(destination!,
+                                                style: const TextStyle(
+                                                    fontSize: 24,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 15),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          ElevatedButton(
+                                            onPressed: camera,
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  const Color.fromARGB(
+                                                      255, 56, 104, 248),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 12),
+                                              minimumSize: const Size(80, 10),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        16), // Border radius of 10
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              'อัพเดตสถานะ',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                  fontSize: 18),
+                                            ),
+                                          ),
+                                          TextButton(
+                                              onPressed: () async {
+                                                var db =
+                                                    FirebaseFirestore.instance;
 
+                                                var querySnapshot = await db
+                                                    .collection('status')
+                                                    .doc(doc)
+                                                    .get();
+                                                var querySnapshot2 = await db
+                                                    .collection('user')
+                                                    .where('phone',
+                                                        isEqualTo:
+                                                            querySnapshot[
+                                                                'sender'])
+                                                    .get();
+                                                var querySnapshot3 = await db
+                                                    .collection('user')
+                                                    .where('phone',
+                                                        isEqualTo:
+                                                            querySnapshot[
+                                                                'receiver'])
+                                                    .get();
+
+                                                Get.defaultDialog(
+                                                  title: "รายระเอียดงาน",
+                                                  titleStyle: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                  content: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start, // Align items to the start
+                                                    children: [
+                                                      Text(
+                                                          "ชื่อผู้ส่ง: ${querySnapshot2.docs[0]['name']}"),
+                                                      Text(
+                                                          "สถานที่ผู้ส่ง: ${querySnapshot['origin']}"),
+                                                      Text(
+                                                          "เบอร์ผู้ส่ง: ${querySnapshot['sender']}"),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                vertical: 10),
+                                                        child: Container(
+                                                          width: 200,
+                                                          height: 1,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                          "ชื่อผู้รับ:  ${querySnapshot3.docs[0]['name']}"),
+                                                      Text(
+                                                          "สถานที่ผู้รับ: ${querySnapshot['destination']}"),
+                                                      Text(
+                                                          "เบอร์ผู้รับ: ${querySnapshot['receiver']}"),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                              child: Text("รายระเอียด")),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // TextButton(onPressed: dispose, child: const Text("xx")),
+                      ],
+                    )
+                  ],
                   if (checkEmpty == 0) ...[
                     const Column(
                       children: [
-                        Text(
-                          "[คุณยังไม่มีสินค้าที่ต้องส่ง]",
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Color.fromARGB(255, 87, 71, 71)
-                          )
-                        )
+                        Text("[คุณยังไม่มีสินค้าที่ต้องส่ง]",
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Color.fromARGB(255, 87, 71, 71)))
                       ],
                     )
                   ]
@@ -337,7 +361,7 @@ class _RiderstatusState extends State<Riderstatus> {
         bottomNavigationBar: const BarRider(),
       ),
     );
-}
+  }
 
   void realtime() {
     try {
@@ -376,6 +400,58 @@ class _RiderstatusState extends State<Riderstatus> {
   }
 
   void camera() async {
+    try {
+      int dist = 0;
+      if (status == 1 || status == 2) {
+        DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+            .collection('status')
+            .doc(doc)
+            .get();
+
+        Position position = await _determinePosition();
+        LatLng currentLocation = LatLng(position.latitude, position.longitude);
+        GeoPoint currentGeoPoint =
+            GeoPoint(currentLocation.latitude, currentLocation.longitude);
+        LatLng senderLocation = const LatLng(0, 0);
+        List<dynamic> senderList = [];
+        double latitude = 0;
+        double longitude = 0;
+
+        if (documentSnapshot['senderlocation'] is GeoPoint) {
+          GeoPoint senderGeo = documentSnapshot['senderlocation'];
+          latitude = senderGeo.latitude;
+          longitude = senderGeo.longitude;
+          senderLocation = LatLng(latitude, longitude);
+        } else if (documentSnapshot['senderlocation'] is List) {
+          senderList = documentSnapshot['senderlocation'];
+          if (senderList.length >= 2) {
+            latitude = senderList[0];
+            longitude = senderList[1];
+            senderLocation = LatLng(latitude, longitude);
+          }
+        }
+
+// Calculate distance
+        if (latitude != 0 && longitude != 0) {
+          double distance = await Geolocator.distanceBetween(
+            currentLocation.latitude,
+            currentLocation.longitude,
+            latitude,
+            longitude,
+          );
+          // Use double.toString() to convert to String
+          log(distance.toString());
+          dist = distance.toInt();
+          if (distance > 20) {
+            Get.snackbar('คุณอยู่ห่างเกินไป', 'ไประยะห่างตอนนี้:$dist เมตร',
+                snackPosition: SnackPosition.TOP);
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      log("message:$e");
+    }
     final ImagePicker picker = ImagePicker();
     image = await picker.pickImage(source: ImageSource.camera);
     if (image != null) {

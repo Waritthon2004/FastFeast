@@ -21,7 +21,7 @@ class Homerider extends StatefulWidget {
 class _HomeriderState extends State<Homerider> {
   late UserInfo user;
   late Future<QuerySnapshot> loadData;
-
+  int dist=0;
   @override
   void initState() {
     super.initState();
@@ -184,6 +184,7 @@ class DeliveryItemWidget extends StatelessWidget {
 
   final MapController mapController = MapController();
   LatLng showw = const LatLng(0, 0);
+  int dist=0;
   late LatLng currentLocation;
   @override
   Widget build(BuildContext context) {
@@ -250,28 +251,29 @@ class DeliveryItemWidget extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                        try {
-                          QuerySnapshot querySnapshot = await FirebaseFirestore
-                              .instance
-                              .collection('status')
-                              .where('rider',
-                                  isGreaterThanOrEqualTo:
-                                      '') // Checking if the field is non-empty
-                              .where('status', isLessThan: 3)
-                              .get();
-
-                          if (querySnapshot.docs.isNotEmpty) {
-                            Get.snackbar(
-                                'ผิดพลาด', 'ไม่สามรถรับงานนี้ได้',
-                                snackPosition: SnackPosition.TOP);
-                            return;
-                          }
-                        } catch (e) {
-                          log('Error querying Firestore: $e');
-                        }
                         Position position = await _determinePosition();
                         LatLng currentLocation =
                             LatLng(position.latitude, position.longitude);
+                        try {
+                          DocumentSnapshot documentSnapshot =
+                              await FirebaseFirestore.instance
+                                  .collection('status')
+                                  .doc(doc)
+                                  .get();
+
+                          if (documentSnapshot['status'] != 0) {
+                            Get.snackbar('ผิดพลาด', 'ไม่สามรถรับงานนี้ได้',
+                                snackPosition: SnackPosition.TOP);
+                            return;
+                          }
+                          GeoPoint currentGeoPoint = GeoPoint(
+                              currentLocation.latitude,
+                              currentLocation.longitude);
+                      
+                        } catch (e) {
+                          log('Error querying Firestore: $e');
+                        }
+
                         try {
                           await FirebaseFirestore.instance
                               .collection('status')
